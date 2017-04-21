@@ -100,9 +100,9 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 				<select name="status" id="rcp-status">
 					<option value="pending"<?php selected( $payment->status, 'pending' ); ?>><?php _e( 'Pending', 'rcp' ); ?></option>
 					<option value="complete"<?php selected( $payment->status, 'complete' ); ?>><?php _e( 'Complete', 'rcp' ); ?></option>
-					<option value="refunded"<?php selected( $payment->status, 'failed' ); ?>><?php _e( 'Failed', 'rcp' ); ?></option>
+					<option value="failed"<?php selected( $payment->status, 'failed' ); ?>><?php _e( 'Failed', 'rcp' ); ?></option>
 					<option value="refunded"<?php selected( $payment->status, 'refunded' ); ?>><?php _e( 'Refunded', 'rcp' ); ?></option>
-					<option value="refunded"<?php selected( $payment->status, 'abandoned' ); ?>><?php _e( 'Abandoned', 'rcp' ); ?></option>
+					<option value="abandoned"<?php selected( $payment->status, 'abandoned' ); ?>><?php _e( 'Abandoned', 'rcp' ); ?></option>
 				</select>
 				<p class="description"><?php _e( 'The status of this payment.', 'rcp' ); ?></p>
 			</td>
