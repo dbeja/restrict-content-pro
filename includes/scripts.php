@@ -174,7 +174,7 @@ function rcp_print_scripts() {
 			'user_has_trialed'   => is_user_logged_in() && rcp_has_used_trial(),
 			'trial_levels'       => rcp_get_trial_level_ids(),
 			'auto_renew_default' => isset( $rcp_options['auto_renew_checked_on'] ),
-			'recaptcha_enabled'  => isset( $rcp_options['enable_recaptcha'] ) ? true : false
+			'recaptcha_enabled'  => rcp_is_recaptcha_enabled()
 		)
 	);
 

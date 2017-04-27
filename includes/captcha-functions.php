@@ -10,6 +10,21 @@
  */
 
 /**
+ * Whether or not reCATPCHA is enabled. The setting must be checked on and
+ * all keys entered for this to return true.
+ *
+ * @since 2.9
+ * @return bool
+ */
+function rcp_is_recaptcha_enabled() {
+
+	global $rcp_options;
+
+	return ( ! empty( $rcp_options['enable_recaptcha'] ) && ! empty( $rcp_options['recaptcha_public_key'] ) && ! empty( $rcp_options['recaptcha_private_key'] ) );
+
+}
+
+/**
  * Add reCAPTCHA to the registration form if it's enabled.
  *
  * @return void
@@ -17,7 +32,7 @@
 function rcp_show_captcha() {
 	global $rcp_options;
 	// reCaptcha
-	if( isset( $rcp_options['enable_recaptcha'] ) && ! empty( $rcp_options['recaptcha_public_key'] ) ) : ?>
+	if( rcp_is_recaptcha_enabled() ) : ?>
 		<div id="rcp_recaptcha" data-callback="rcp_validate_recaptcha" class="g-recaptcha" data-sitekey="<?php echo esc_attr( $rcp_options['recaptcha_public_key'] ); ?>"></div>
 		<input type="hidden" name="g-recaptcha-remoteip" value=<?php echo esc_attr( rcp_get_ip() ); ?> /><br/>
 	<?php endif;
@@ -35,7 +50,7 @@ function rcp_validate_captcha( $data ) {
 
 	global $rcp_options;
 
-	if( ! isset( $rcp_options['enable_recaptcha'] ) || empty( $rcp_options['recaptcha_public_key'] ) || empty( $rcp_options['recaptcha_private_key'] ) ) {
+	if( ! rcp_is_recaptcha_enabled() ) {
 		return;
 	}
 

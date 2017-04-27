@@ -221,8 +221,8 @@ class RCP_WooCommerce {
 	/**
 	 * Restrict the ability to purchase a product
 	 *
-	 * @param bool   $ret
-	 * @param object $product
+	 * @param bool       $ret
+	 * @param WC_Product $product
 	 *
 	 * @access  public
 	 * @since   2.2
@@ -233,9 +233,9 @@ class RCP_WooCommerce {
 		if( $ret ) {
 
 			$has_access   = true;
-			$active_only  = get_post_meta( $product->id, '_rcp_woo_active_to_purchase', true );
-			$levels       = (array) get_post_meta( $product->id, '_rcp_woo_subscription_levels_to_purchase', true );
-			$access_level = get_post_meta( $product->id, '_rcp_woo_access_level_to_purchase', true );
+			$active_only  = get_post_meta( $product->get_id(), '_rcp_woo_active_to_purchase', true );
+			$levels       = (array) get_post_meta( $product->get_id(), '_rcp_woo_subscription_levels_to_purchase', true );
+			$access_level = get_post_meta( $product->get_id(), '_rcp_woo_access_level_to_purchase', true );
 
 			if( $active_only ) {
 
@@ -356,7 +356,7 @@ class RCP_WooCommerce {
 
 
 		$active_only    = get_post_meta( $product_id, '_rcp_woo_active_to_view', true );
-		$levels         = (array) get_post_meta( $product_id, '_rcp_woo_subscription_levels_to_view', true );
+		$levels         = get_post_meta( $product_id, '_rcp_woo_subscription_levels_to_view', true );
 		$access_level   = get_post_meta( $product_id, '_rcp_woo_access_level_to_view', true );
 
 		$product_cat    = rcp_is_post_taxonomy_restricted( $product_id, 'product_cat' );
@@ -386,7 +386,7 @@ class RCP_WooCommerce {
 		}
 
 		// Subscription level setting
-		if ( ! in_array( rcp_get_subscription_id(), $levels ) ) {
+		if ( is_array( $levels ) && ! in_array( rcp_get_subscription_id(), $levels ) ) {
 			$visible = false;
 		}
 

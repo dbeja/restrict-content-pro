@@ -401,6 +401,10 @@ function rcp_email_member_on_renewal_payment_failure( RCP_Member $member, RCP_Pa
 	$subject = isset( $rcp_options['renewal_payment_failed_subject'] ) ? $rcp_options['renewal_payment_failed_subject'] : '';
 	$subject = apply_filters( 'rcp_subscription_renewal_payment_failed_subject', $subject, $member->ID, $status );
 
+	if ( empty( $subject ) || empty( $message ) ) {
+		return;
+	}
+
 	$emails = new RCP_Emails;
 	$emails->member_id = $member->ID;
 

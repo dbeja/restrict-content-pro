@@ -640,8 +640,6 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 
 			var rcp_form = document.getElementById("rcp_registration_form");
 
-			var rcp_braintree_processing_submission = false;
-
 			/**
 			 * Braintree requires data-braintree-name attributes on the inputs.
 			 * Let's add them and remove the name attribute to prevent card
@@ -680,17 +678,11 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 				}
 			});
 
-			jQuery('body').on('rcp_register_form_submission', function rcp_braintree_register_form_submission_handler(event, response, form_id) {
+			jQuery('body').off('rcp_register_form_submission').on('rcp_register_form_submission', function rcp_braintree_register_form_submission_handler(event, response, form_id) {
 
 				if ( response.gateway.slug !== 'braintree' ) {
 					return;
 				}
-
-				if ( rcp_braintree_processing_submission ) {
-					return;
-				}
-
-				rcp_braintree_processing_submission = true;
 
 				event.preventDefault();
 

@@ -96,7 +96,7 @@ class RCP_Payment_Gateway_Stripe_Checkout extends RCP_Payment_Gateway_Stripe {
 			 * 'rcp_register_form_submission' is triggered in register.js
 			 * if the form data is successfully validated.
 			 */
-			jQuery('body').on('rcp_register_form_submission', function(e, response, form_id) {
+			jQuery('body').off('rcp_register_form_submission').on('rcp_register_form_submission', function(e, response, form_id) {
 
 				if ( response.gateway.slug !== 'stripe_checkout' ) {
 					return;

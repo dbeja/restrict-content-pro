@@ -104,7 +104,7 @@ function rcp_registration_form_fields( $id = null, $atts = array() ) {
 
 	ob_start();
 
-	do_action( 'rcp_before_register_form', $id );
+	do_action( 'rcp_before_register_form', $id, $atts );
 
 	if( ! is_null( $id ) ) {
 
@@ -124,7 +124,7 @@ function rcp_registration_form_fields( $id = null, $atts = array() ) {
 
 	}
 
-	do_action( 'rcp_after_register_form', $id );
+	do_action( 'rcp_after_register_form', $id, $atts );
 
 	return ob_get_clean();
 }

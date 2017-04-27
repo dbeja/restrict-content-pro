@@ -374,7 +374,7 @@ class RCP_Member extends WP_User {
 			$subscription_id = $this->get_subscription_id();
 		}
 
-		$date = get_user_meta( $this->ID, 'rcp_renewed_date_' . $this->get_subscription_id() );
+		$date = get_user_meta( $this->ID, 'rcp_renewed_date_' . $this->get_subscription_id(), true );
 
 		return apply_filters( 'rcp_get_renewed_date', $date, $this->ID, $subscription_id, $this );
 
@@ -1297,7 +1297,7 @@ class RCP_Member extends WP_User {
 
 				foreach( $terms as $term_id ) {
 
-					$restrictions = rcp_get_term_restrictions( $term_id['term_taxonomy_id'] );
+					$restrictions = rcp_get_term_restrictions( $term_id );
 
 					if ( empty( $restrictions['paid_only'] ) && empty( $restrictions['subscriptions'] ) && ( empty( $restrictions['access_level'] ) || 'None' == $restrictions['access_level'] ) ) {
 						if ( count( $terms ) === 1 ) {
@@ -1341,7 +1341,7 @@ class RCP_Member extends WP_User {
 
 				foreach( $terms as $term_id ) {
 
-					$restrictions = rcp_get_term_restrictions( $term_id['term_taxonomy_id'] );
+					$restrictions = rcp_get_term_restrictions( $term_id );
 
 					if ( empty( $restrictions['paid_only'] ) && empty( $restrictions['subscriptions'] ) && ( empty( $restrictions['access_level'] ) || 'None' == $restrictions['access_level'] ) ) {
 						if ( count( $terms ) === 1 ) {

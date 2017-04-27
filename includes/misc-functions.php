@@ -83,32 +83,32 @@ function rcp_currency_filter( $price ) {
 	$position = isset( $rcp_options['currency_position'] ) ? $rcp_options['currency_position'] : 'before';
 	if ( $position == 'before' ) :
 		switch ( $currency ) :
-			case "USD" : return '&#36;' . $price; break;
-			case "EUR" : return '&#8364;' . $price; break;
-			case "GBP" : return '&#163;' . $price; break;
-			case "AUD" : return '&#36;' . $price; break;
-			case "BRL" : return '&#82;&#36;' . $price; break;
-			case "CAD" : return '&#36;' . $price; break;
-			case "CHF" : return '&#67;&#72;&#70;' . $price; break;
-			case "CZK" : return '&#75;&#269;' . $price; break;
-			case "DKK" : return '&#107;&#114;' . $price; break;
-			case "HKD" : return '&#36;' . $price; break;
-			case "HUF" : return '&#70;&#116;' . $price; break;
-			case "ILS" : return '&#8362;' . $price; break;
-			case "IRR" : return '&#65020;' . $price; break;
-			case "JPY" : return '&#165;' . $price; break;
-			case "MXN" : return '&#36;' . $price; break;
-			case "MYR" : return '&#82;&#77;' . $price; break;
-			case "NOK" : return '&#107;&#114;' . $price; break;
-			case "NZD" : return '&#36;' . $price; break;
-			case "PHP" : return '&#8369;' . $price; break;
-			case "PLN" : return '&#122;&#322;' . $price; break;
-			case "RUB" : return '&#1088;&#1091;&#1073;' . $price; break;
-			case "SEK" : return '&#107;&#114;' . $price; break;
-			case "SGD" : return '&#36;' . $price; break;
-			case "THB" : return '&#3647;' . $price; break;
-			case "TRY" : return '&#8356;' . $price; break;
-			case "TWD" : return '&#78;&#84;&#36;' . $price; break;
+			case "USD" : $formatted = '&#36;' . $price; break;
+			case "EUR" : $formatted = '&#8364;' . $price; break;
+			case "GBP" : $formatted = '&#163;' . $price; break;
+			case "AUD" : $formatted = '&#36;' . $price; break;
+			case "BRL" : $formatted = '&#82;&#36;' . $price; break;
+			case "CAD" : $formatted = '&#36;' . $price; break;
+			case "CHF" : $formatted = '&#67;&#72;&#70;' . $price; break;
+			case "CZK" : $formatted = '&#75;&#269;' . $price; break;
+			case "DKK" : $formatted = '&#107;&#114;' . $price; break;
+			case "HKD" : $formatted = '&#36;' . $price; break;
+			case "HUF" : $formatted = '&#70;&#116;' . $price; break;
+			case "ILS" : $formatted = '&#8362;' . $price; break;
+			case "IRR" : $formatted = '&#65020;' . $price; break;
+			case "JPY" : $formatted = '&#165;' . $price; break;
+			case "MXN" : $formatted = '&#36;' . $price; break;
+			case "MYR" : $formatted = '&#82;&#77;' . $price; break;
+			case "NOK" : $formatted = '&#107;&#114;' . $price; break;
+			case "NZD" : $formatted = '&#36;' . $price; break;
+			case "PHP" : $formatted = '&#8369;' . $price; break;
+			case "PLN" : $formatted = '&#122;&#322;' . $price; break;
+			case "RUB" : $formatted = '&#1088;&#1091;&#1073;' . $price; break;
+			case "SEK" : $formatted = '&#107;&#114;' . $price; break;
+			case "SGD" : $formatted = '&#36;' . $price; break;
+			case "THB" : $formatted = '&#3647;' . $price; break;
+			case "TRY" : $formatted = '&#8356;' . $price; break;
+			case "TWD" : $formatted = '&#78;&#84;&#36;' . $price; break;
 			default :
 				$formatted = $currency . ' ' . $price;
 				break;
@@ -116,32 +116,32 @@ function rcp_currency_filter( $price ) {
 		return apply_filters( 'rcp_' . strtolower( $currency ) . '_currency_filter_before', $formatted, $currency, $price );
 	else :
 		switch ( $currency ) :
-			case "USD" : return $price . '&#36;'; break;
-			case "EUR" : return $price . '&#8364;'; break;
-			case "GBP" : return $price . '&#163;'; break;
-			case "AUD" : return $price . '&#36;'; break;
-			case "BRL" : return $price . '&#82;&#36;'; break;
-			case "CAD" : return $price . '&#36;'; break;
-			case "CHF" : return $price . '&#67;&#72;&#70;'; break;
-			case "CZK" : return $price . '&#75;&#269;'; break;
-			case "DKK" : return $price . '&#107;&#114;'; break;
-			case "HKD" : return $price . '&#36;'; break;
-			case "HUF" : return $price . '&#70;&#116;'; break;
-			case "ILS" : return $price . '&#8362;'; break;
-			case "IRR" : return $price . '&#65020;'; break;
-			case "JPY" : return $price . '&#165;'; break;
-			case "MXN" : return $price . '&#36;'; break;
-			case "MYR" : return $price . '&#82;&#77;'; break;
-			case "NOK" : return $price . '&#107;&#114;'; break;
-			case "NZD" : return $price . '&#36;'; break;
-			case "PHP" : return $price . '&#8369;'; break;
-			case "PLN" : return $price . '&#122;&#322;'; break;
-			case "RUB" : return $price . '&#1088;&#1091;&#1073;'; break;
-			case "SEK" : return $price . '&#107;&#114;'; break;
-			case "SGD" : return $price . '&#36;'; break;
-			case "THB" : return $price . '&#3647;'; break;
-			case "TRY" : return $price . '&#8356;'; break;
-			case "TWD" : return $price . '&#78;&#84;&#36;'; break;
+			case "USD" : $formatted = $price . '&#36;'; break;
+			case "EUR" : $formatted = $price . '&#8364;'; break;
+			case "GBP" : $formatted = $price . '&#163;'; break;
+			case "AUD" : $formatted = $price . '&#36;'; break;
+			case "BRL" : $formatted = $price . '&#82;&#36;'; break;
+			case "CAD" : $formatted = $price . '&#36;'; break;
+			case "CHF" : $formatted = $price . '&#67;&#72;&#70;'; break;
+			case "CZK" : $formatted = $price . '&#75;&#269;'; break;
+			case "DKK" : $formatted = $price . '&#107;&#114;'; break;
+			case "HKD" : $formatted = $price . '&#36;'; break;
+			case "HUF" : $formatted = $price . '&#70;&#116;'; break;
+			case "ILS" : $formatted = $price . '&#8362;'; break;
+			case "IRR" : $formatted = $price . '&#65020;'; break;
+			case "JPY" : $formatted = $price . '&#165;'; break;
+			case "MXN" : $formatted = $price . '&#36;'; break;
+			case "MYR" : $formatted = $price . '&#82;&#77;'; break;
+			case "NOK" : $formatted = $price . '&#107;&#114;'; break;
+			case "NZD" : $formatted = $price . '&#36;'; break;
+			case "PHP" : $formatted = $price . '&#8369;'; break;
+			case "PLN" : $formatted = $price . '&#122;&#322;'; break;
+			case "RUB" : $formatted = $price . '&#1088;&#1091;&#1073;'; break;
+			case "SEK" : $formatted = $price . '&#107;&#114;'; break;
+			case "SGD" : $formatted = $price . '&#36;'; break;
+			case "THB" : $formatted = $price . '&#3647;'; break;
+			case "TRY" : $formatted = $price . '&#8356;'; break;
+			case "TWD" : $formatted = $price . '&#78;&#84;&#36;'; break;
 			default :
 				$formatted = $price . ' ' . $currency;
 				break;
@@ -837,8 +837,10 @@ function rcp_currency_decimal_filter( $decimals = 2 ) {
  * @return array An array of taxonomy term IDs connected to the post.
  */
 function rcp_get_connected_term_ids( $post_id = 0 ) {
-	global $wpdb;
-	return $wpdb->get_results( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_relationships} WHERE object_id = %d", absint( $post_id ) ), ARRAY_A );
+	$taxonomies = array_values( get_taxonomies( array( 'public' => true ) ) );
+	$terms      = wp_get_object_terms( $post_id, $taxonomies, array( 'fields' => 'ids' ) );
+
+	return $terms;
 }
 
 /**
@@ -895,7 +897,7 @@ function rcp_get_post_ids_assigned_to_restricted_terms() {
 				continue;
 			}
 
-			$p_ids = $wpdb->get_results( $wpdb->prepare( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", absint( $term->term_id ) ), ARRAY_A );
+			$p_ids = $wpdb->get_results( $wpdb->prepare( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", absint( $term->term_taxonomy_id ) ), ARRAY_A );
 			foreach( $p_ids as $p_id ) {
 				if ( ! in_array( $p_id['object_id'], $post_ids ) ) {
 					$post_ids[] = $p_id['object_id'];

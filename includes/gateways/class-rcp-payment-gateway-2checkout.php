@@ -370,19 +370,11 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 				// Pull in the public encryption key for our environment
 				TCO.loadPubKey('<?php echo $this->environment; ?>');
 
-				var rcp_twocheckout_processing_submission = false;
-
-				jQuery('body').on('rcp_register_form_submission', function rcp_2co_register_form_submission_handler(event, response, form_id) {
+				jQuery('body').off('rcp_register_form_submission').on('rcp_register_form_submission', function rcp_2co_register_form_submission_handler(event, response, form_id) {
 
 					if ( response.gateway.slug !== 'twocheckout' ) {
 						return;
 					}
-
-					if ( rcp_twocheckout_processing_submission ) {
-						return;
-					}
-
-					rcp_twocheckout_processing_submission = true;
 
 					event.preventDefault();
 

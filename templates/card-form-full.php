@@ -33,7 +33,7 @@
         <input type="text" size="20" name="rcp_card_city" class="rcp_card_city card-city" />
     </p>
     <p id="rcp_card_state_wrap">
-        <label><?php _e( 'State or Providence', 'rcp' ); ?></label>
+        <label><?php _e( 'State or Province', 'rcp' ); ?></label>
         <input type="text" size="20" name="rcp_card_state" class="rcp_card_state card-state" />
     </p>
     <p id="rcp_card_country_wrap">

@@ -3,7 +3,7 @@
  * Plugin Name: Restrict Content Pro
  * Plugin URL: https://restrictcontentpro.com
  * Description: Set up a complete subscription system for your WordPress site and deliver premium content to your subscribers. Unlimited subscription packages, membership management, discount codes, registration / login forms, and more.
- * Version: 2.8.3
+ * Version: 2.8.5
  * Author: Restrict Content Pro Team
  * Author URI: https://restrictcontentpro.com
  * Contributors: mordauk
@@ -20,7 +20,7 @@ if ( !defined( 'RCP_PLUGIN_FILE' ) ) {
 	define( 'RCP_PLUGIN_FILE', __FILE__ );
 }
 if ( !defined( 'RCP_PLUGIN_VERSION' ) ) {
-	define( 'RCP_PLUGIN_VERSION', '2.8.3' );
+	define( 'RCP_PLUGIN_VERSION', '2.8.5' );
 }
 if ( ! defined( 'CAL_GREGORIAN' ) ) {
 	define( 'CAL_GREGORIAN', 1 );
@@ -232,7 +232,7 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 	 * @return void
 	 */
 	function rcp_below_php_version_notice() {
-		if ( current_user_can( 'rcp_manage_settings' ) ) {
+		if ( current_user_can( 'activate_plugins' ) ) {
 			echo '<div class="error"><p>' . __( 'Your version of PHP is below the minimum version of PHP required by Restrict Content Pro. Please contact your host and request that your version be upgraded to 5.3 or later.', 'rcp' ) . '</p></div>';
 		}
 	}
@@ -337,9 +337,7 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 
 		include( RCP_PLUGIN_DIR . 'includes/content-filters.php' );
 		include( RCP_PLUGIN_DIR . 'includes/feed-functions.php' );
-		if( isset( $rcp_options['enable_recaptcha'] ) ) {
-			require_once( RCP_PLUGIN_DIR . 'includes/captcha-functions.php' );
-		}
+		require_once( RCP_PLUGIN_DIR . 'includes/captcha-functions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/query-filters.php' );
 		include( RCP_PLUGIN_DIR . 'includes/redirects.php' );
 	}

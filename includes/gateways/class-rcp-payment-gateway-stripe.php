@@ -142,19 +142,6 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 		}
 
-		$customer->description = 'User ID: ' . $this->user_id . ' - User Email: ' . $this->email . ' Subscription: ' . $this->subscription_name;
-		$customer->metadata    = array(
-			'user_id'      => $this->user_id,
-			'email'        => $this->email,
-			'subscription' => $this->subscription_name
-		);
-
-		try {
-			$customer->save();
-		} catch( Exception $e ) {
-			$this->handle_processing_error( $e );
-		}
-
 		if ( $this->auto_renew ) {
 
 			// process a subscription sign up
@@ -215,8 +202,12 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 				}
 
 				$sub_args = array(
-					'plan'    => $plan_id,
-					'prorate' => false
+					'plan'     => $plan_id,
+					'prorate'  => false,
+					'metadata' => array(
+						'rcp_subscription_level_id' => $this->subscription_id,
+						'rcp_member_id'             => $this->user_id
+					)
 				);
 
 				if ( ! empty( $this->discount_code ) && ! isset( $rcp_options['one_time_discounts'] ) ) {
@@ -306,6 +297,9 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 					'status'         => 'complete'
 				) );
 
+				// Subscription ID is not used when non-recurring.
+				delete_user_meta( $member->ID, 'rcp_merchant_subscription_id' );
+
 				$paid = true;
 
 			} catch ( \Stripe\Error\Card $e ) {
@@ -348,6 +342,20 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 		}
 
 		if ( $paid ) {
+
+			// Add description and meta to Stripe Customer
+			$customer->description = 'User ID: ' . $this->user_id . ' - User Email: ' . $this->email . ' Subscription: ' . $this->subscription_name;
+			$customer->metadata    = array(
+				'user_id'      => $this->user_id,
+				'email'        => $this->email,
+				'subscription' => $this->subscription_name
+			);
+
+			try {
+				$customer->save();
+			} catch( Exception $e ) {
+				$this->handle_processing_error( $e );
+			}
 
 			// If this is a one-time signup and the customer has an existing subscription, we need to cancel it
 			if( ! $this->auto_renew && $member->just_upgraded() && $member->can_cancel() ) {
@@ -625,7 +633,6 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 			var rcp_script_options;
 			var rcp_processing;
-			var rcp_stripe_processing = false;
 
 			// this identifies your website in the createToken call below
 			Stripe.setPublishableKey('<?php echo $this->publishable_key; ?>');
@@ -642,7 +649,6 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 					jQuery('#rcp_submit').before( '<div class="rcp_message error"><p class="rcp_error"><span>' + response.error.message + '</span></p></div>' );
 					jQuery('#rcp_submit').val( rcp_script_options.register );
 
-					rcp_stripe_processing = false;
 					rcp_processing = false;
 
 				} else {
@@ -661,40 +667,34 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 			jQuery(document).ready(function($) {
 
-				$('body').on('rcp_register_form_submission', function(event, response, form_id) {
+				$('body').off('rcp_register_form_submission').on('rcp_register_form_submission', function(event, response, form_id) {
 
-					if( ! rcp_stripe_processing ) {
+					// get the subscription price
+					if( $('.rcp_level:checked').length ) {
+						var price = $('.rcp_level:checked').closest('.rcp_subscription_level').find('span.rcp_price').attr('rel') * <?php echo rcp_stripe_get_currency_multiplier(); ?>;
+					} else {
+						var price = $('.rcp_level').attr('rel') * <?php echo rcp_stripe_get_currency_multiplier(); ?>;
+					}
 
-						rcp_stripe_processing = true;
+					if( response.gateway.slug === 'stripe' && price > 0 && ! $('.rcp_gateway_fields').hasClass('rcp_discounted_100')) {
 
-						// get the subscription price
-						if( $('.rcp_level:checked').length ) {
-							var price = $('.rcp_level:checked').closest('.rcp_subscription_level').find('span.rcp_price').attr('rel') * <?php echo rcp_stripe_get_currency_multiplier(); ?>;
-						} else {
-							var price = $('.rcp_level').attr('rel') * <?php echo rcp_stripe_get_currency_multiplier(); ?>;
-						}
+						event.preventDefault();
 
-						if( response.gateway.slug === 'stripe' && price > 0 && ! $('.rcp_gateway_fields').hasClass('rcp_discounted_100')) {
+						// disable the submit button to prevent repeated clicks
+						$('#rcp_registration_form #rcp_submit').attr("disabled", "disabled");
+						$('#rcp_ajax_loading').show();
 
-							event.preventDefault();
+						// createToken returns immediately - the supplied callback submits the form if there are no errors
+						Stripe.createToken({
+							number: $('.card-number').val(),
+							name: $('.card-name').val(),
+							cvc: $('.card-cvc').val(),
+							exp_month: $('.card-expiry-month').val(),
+							exp_year: $('.card-expiry-year').val(),
+							address_zip: $('.card-zip').val()
+						}, stripeResponseHandler);
 
-							// disable the submit button to prevent repeated clicks
-							$('#rcp_registration_form #rcp_submit').attr("disabled", "disabled");
-							$('#rcp_ajax_loading').show();
-
-							// createToken returns immediately - the supplied callback submits the form if there are no errors
-							Stripe.createToken({
-								number: $('.card-number').val(),
-								name: $('.card-name').val(),
-								cvc: $('.card-cvc').val(),
-								exp_month: $('.card-expiry-month').val(),
-								exp_year: $('.card-expiry-year').val(),
-								address_zip: $('.card-zip').val()
-							}, stripeResponseHandler);
-
-							return false;
-						}
-
+						return false;
 					}
 
 				});

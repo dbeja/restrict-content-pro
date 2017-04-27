@@ -226,6 +226,11 @@ function rcp_process_registration() {
 
 		if( ! empty( $discount ) && $full_discount ) {
 
+			// Full discount with auto renew should never expire.
+			if ( $auto_renew ) {
+				$member_data['expiration'] = 'none';
+			}
+
 			rcp_add_subscription_to_user( $user_data['id'], $member_data );
 			rcp_login_user_in( $user_data['id'], $user_data['login'] );
 			wp_redirect( rcp_get_return_url( $user_data['id'] ) ); exit;
@@ -272,7 +277,7 @@ function rcp_process_registration() {
 			$subscription_data['fee'] = -1 * $subscription_data['price'];
 		}
 
-		update_user_meta( $user_data['id'], 'rcp_pending_subscription_amount', $subscription_data['price'] + $subscription_data['fee'] );
+		update_user_meta( $user_data['id'], 'rcp_pending_subscription_amount', round( $subscription_data['price'] + $subscription_data['fee'], 2 ) );
 
 		// send all of the subscription data off for processing by the gateway
 		rcp_send_to_gateway( $gateway, apply_filters( 'rcp_subscription_data', $subscription_data ) );
@@ -512,7 +517,7 @@ function rcp_remove_new_subscription_flag( $status, $user_id ) {
 	delete_user_meta( $user_id, '_rcp_old_subscription_id' );
 	delete_user_meta( $user_id, '_rcp_new_subscription' );
 }
-add_action( 'rcp_set_status', 'rcp_remove_new_subscription_flag', 999999999999, 2 );
+add_action( 'rcp_set_status', 'rcp_remove_new_subscription_flag', 9999999, 2 );
 
 /**
  * When upgrading subscriptions, the new level / key are stored as pending. Once payment is received, the pending

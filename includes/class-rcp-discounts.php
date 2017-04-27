@@ -367,7 +367,7 @@ class RCP_Discounts {
 					`subscription_id`= '%d'
 				;",
 				sanitize_text_field( $args['name'] ),
-				strip_tags( addslashes( $args['description'] ) ),
+				strip_tags( $args['description'] ),
 				sanitize_text_field( $args['amount'] ),
 				$args['unit'],
 				sanitize_text_field( $args['code'] ),
@@ -436,7 +436,7 @@ class RCP_Discounts {
 					WHERE `id`        = '%d'
 				;",
 				sanitize_text_field( $args['name'] ),
-				strip_tags( addslashes( $args['description'] ) ),
+				strip_tags( $args['description'] ),
 				sanitize_text_field( $args['amount'] ),
 				$args['unit'],
 				sanitize_text_field( $args['code'] ),
