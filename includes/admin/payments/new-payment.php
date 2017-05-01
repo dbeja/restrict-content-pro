@@ -62,8 +62,11 @@
 				</th>
 				<td>
 					<select name="status" id="rcp-status">
+						<option value="pending"><?php _e( 'Pending', 'rcp' ); ?></option>
 						<option value="complete"><?php _e( 'Complete', 'rcp' ); ?></option>
+						<option value="failed"><?php _e( 'Failed', 'rcp' ); ?></option>
 						<option value="refunded"><?php _e( 'Refunded', 'rcp' ); ?></option>
+						<option value="abandoned"><?php _e( 'Abandoned', 'rcp' ); ?></option>
 					</select>
 					<p class="description"><?php _e( 'The status of this payment.', 'rcp' ); ?></p>
 				</td>
