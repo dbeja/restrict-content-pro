@@ -204,17 +204,11 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 
 					if ( $single_payment->success ) {
 
-						$payment_data = array(
-							'subscription'     => $this->subscription_data['subscription_name'],
-							'date'             => date( 'Y-m-d g:i:s', time() ),
-							'amount'           => $single_payment->transaction->amount,
-							'user_id'          => $this->user_id,
-							'payment_type'     => __( 'Braintree Credit Card Initial Payment', 'rcp' ),
-							'subscription_key' => $this->subscription_data['key'],
-							'transaction_id'   => $single_payment->transaction->id
-						);
-						$rcp_payments = new RCP_Payments;
-						$rcp_payments->insert( $payment_data );
+						$this->payment->update( array(
+							'date'           => date( 'Y-m-d g:i:s', time() ),
+							'transaction_id' => $single_payment->transaction->id,
+						    'status'         => 'complete'
+						) );
 
 
 					} else {
@@ -356,17 +350,12 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 			}
 
 			// Log the one-time payment
-			$payment_data = array(
-				'subscription'     => $this->subscription_data['subscription_name'],
-				'date'             => date( 'Y-m-d g:i:s', time() ),
-				'amount'           => $result->transaction->amount,
-				'user_id'          => $this->user_id,
-				'payment_type'     => __( 'Braintree Credit Card One Time', 'rcp' ),
-				'subscription_key' => $this->subscription_data['key'],
-				'transaction_id'   => $result->transaction->id
-			);
-			$rcp_payments = new RCP_Payments;
-			$rcp_payments->insert( $payment_data );
+			$this->payment->update( array(
+				'date'           => date( 'Y-m-d g:i:s', time() ),
+				'payment_type'   => __( 'Braintree Credit Card One Time', 'rcp' ),
+				'transaction_id' => $result->transaction->id,
+				'status'         => 'complete'
+			) );
 
 			// Update the member
 			$member->renew( false, 'active', $member->calculate_expiration() );

@@ -46,20 +46,13 @@ class RCP_Payment_Gateway_Manual extends RCP_Payment_Gateway {
 
 		$member->renew( false, 'pending', $expiration );
 
-		// setup the payment info in an array for storage
-		$payment_data = array(
-			'subscription'     => $this->subscription_name,
-			'payment_type'     => 'manual',
-			'subscription_key' => $this->subscription_key,
-			'amount'           => $this->amount + $this->signup_fee,
-			'user_id'          => $this->user_id,
-			'transaction_id'   => $this->generate_transaction_id()
-		);
+		// Update payment record with transaction ID.
+		$this->payment->update( array(
+			'payment_type'   => 'manual',
+			'transaction_id' => $this->generate_transaction_id()
+		) );
 
-		$rcp_payments = new RCP_Payments();
-		$payment_id   = $rcp_payments->insert( $payment_data );
-
-		do_action( 'rcp_process_manual_signup', $member, $payment_id, $this );
+		do_action( 'rcp_process_manual_signup', $member, $this->payment->id, $this );
 
 		wp_redirect( $this->return_url ); exit;
 

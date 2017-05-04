@@ -132,18 +132,12 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 					$cancelled = $member->cancel_payment_profile( false );
 				}
 
-				$payment_data = array(
+				$this->payment->update( array(
 					'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
-					'subscription'     => $this->subscription_name,
 					'payment_type'     => $payment_type,
-					'subscription_key' => $this->subscription_key,
-					'amount'           => $this->initial_amount,
-					'user_id'          => $this->user_id,
-					'transaction_id'   => $charge['response']['orderNumber']
-				);
-
-				$rcp_payments = new RCP_Payments();
-				$rcp_payments->insert( $payment_data );
+					'transaction_id'   => $charge['response']['orderNumber'],
+				    'status'           => 'complete'
+				) );
 
 				$paid = true;
 			}
