@@ -36,9 +36,9 @@ function rcp_payments_page() {
 		<?php do_action('rcp_payments_page_top');
 
 		$rcp_payments  = new RCP_Payments();
-		$page          = isset( $_GET['p'] ) ? $_GET['p'] : 1;
-		$per_page      = 20;
-		$search        = ! empty( $_GET['s'] )       ? urldecode( $_GET['s'] )      : '';
+		$page          = isset( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
+		$search        = ! empty( $_GET['s'] ) ? urldecode( $_GET['s'] ) : '';
+		$status        = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : '';
 
 		$user          = get_current_user_id();
 		$screen        = get_current_screen();
@@ -47,21 +47,63 @@ function rcp_payments_page() {
 		if ( empty ( $per_page) || $per_page < 1 ) {
 			$per_page  = $screen->get_option( 'per_page', 'default' );
 		}
-		$total_pages   = 1;
 		$offset        = $per_page * ( $page-1 );
 
 		$user_id       = isset( $_GET['user_id'] ) ? $_GET['user_id'] : 0;
 
-		$payments      = $rcp_payments->get_payments( array( 'offset' => $offset, 'number' => $per_page, 'user_id' => $user_id, 's' => $search ) );
-		$payment_count = $rcp_payments->count( array( 'user_id' => $user_id ) );
+		$payments      = $rcp_payments->get_payments( array( 'offset' => $offset, 'number' => $per_page, 'user_id' => $user_id, 's' => $search, 'status' => $status ) );
+		$payment_count = $rcp_payments->count( array( 'user_id' => $user_id, 's' => $search, 'status' => $status ) );
 		$total_pages   = ceil( $payment_count / $per_page );
+
+		// Status counts.
+		$all_count       = $rcp_payments->count();
+		$complete_count  = $rcp_payments->count( array( 'status' => 'complete' ) );
+		$pending_count   = $rcp_payments->count( array( 'status' => 'pending' ) );
+		$refunded_count  = $rcp_payments->count( array( 'status' => 'refunded' ) );
 		?>
 		<form id="rcp-member-search" method="get" action="<?php menu_page_url( 'rcp-payments' ); ?>">
 			<label class="screen-reader-text" for="rcp-member-search-input"><?php _e( 'Search Payments', 'rcp' ); ?></label>
 			<input type="search" id="rcp-member-search-input" name="s" value="<?php echo esc_attr( $search ); ?>"/>
 			<input type="hidden" name="page" value="rcp-payments"/>
+			<?php if ( ! empty( $status ) ) : ?>
+				<input type="hidden" name="status" value="<?php echo esc_attr( $status ); ?>"/>
+			<?php endif; ?>
 			<input type="submit" name="" id="rcp-member-search-submit" class="button" value="<?php _e( 'Search Payments', 'rcp' ); ?>"/>
 		</form>
+
+		<ul class="subsubsub">
+			<li>
+				<a href="<?php echo esc_url( remove_query_arg( 'status', $current_page ) ); ?>" title="<?php esc_attr_e( 'View all payments', 'rcp' ); ?>"<?php echo '' == $status ? ' class="current"' : ''; ?>>
+					<?php _e( 'All', 'rcp' ); ?>
+					<span class="count">(<?php echo $all_count; ?>)</span>
+				</a>
+			</li>
+			<?php if ( $complete_count > 0 ) : ?>
+				<li>
+					|<a href="<?php echo esc_url( add_query_arg( 'status', 'complete', $current_page ) ); ?>" title="<?php esc_attr_e( 'View complete payments', 'rcp' ); ?>"<?php echo 'complete' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'Complete', 'rcp' ); ?>
+						<span class="count">(<?php echo $complete_count; ?>)</span>
+					</a>
+				</li>
+			<?php endif; ?>
+			<?php if ( $pending_count > 0 ) : ?>
+				<li>
+					|<a href="<?php echo esc_url( add_query_arg( 'status', 'pending', $current_page ) ); ?>" title="<?php esc_attr_e( 'View pending payments', 'rcp' ); ?>"<?php echo 'pending' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'Pending', 'rcp' ); ?>
+						<span class="count">(<?php echo $pending_count; ?>)</span>
+					</a>
+				</li>
+			<?php endif; ?>
+			<?php if ( $refunded_count > 0 ) : ?>
+				<li>
+					|<a href="<?php echo esc_url( add_query_arg( 'status', 'refunded', $current_page ) ); ?>" title="<?php esc_attr_e( 'View refunded payments', 'rcp' ); ?>"<?php echo 'refunded' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'Refunded', 'rcp' ); ?>
+						<span class="count">(<?php echo $refunded_count; ?>)</span>
+					</a>
+				</li>
+			<?php endif; ?>
+		</ul>
+
 		<p class="total"><strong><?php _e( 'Total Earnings', 'rcp' ); ?>: <?php echo rcp_currency_filter( number_format_i18n( $rcp_payments->get_earnings(), 2 ) ); ?></strong></p>
 		<?php if( ! empty( $user_id ) ) : ?>
 		<p><a href="<?php echo admin_url( 'admin.php?page=rcp-payments' ); ?>" class="button-secondary" title="<?php _e( 'View all payments', 'rcp' ); ?>"><?php _e( 'Reset User Filter', 'rcp' ); ?></a></p>

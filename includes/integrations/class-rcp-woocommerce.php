@@ -378,7 +378,7 @@ class RCP_WooCommerce {
 			return $template;
 		}
 
-		$visible = true;
+		$visible = ( $cat_restricted || $tag_restricted ) ? false : true;
 
 		// Active subscription setting
 		if ( $active_only && ! rcp_is_active() ) {

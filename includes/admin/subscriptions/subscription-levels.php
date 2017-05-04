@@ -14,39 +14,72 @@
  * @return void
  */
 function rcp_member_levels_page() {
-	global $rcp_options, $rcp_db_name, $wpdb;
-	$page = admin_url( '/admin.php?page=rcp-member-levels' );
+	global $rcp_options, $rcp_db_name, $wpdb, $rcp_levels_db;
+	$page   = admin_url( '/admin.php?page=rcp-member-levels' );
+	$status = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : 'all';
+
+	// Query counts.
+	$all_count      = $rcp_levels_db->count();
+	$active_count   = $rcp_levels_db->count( array( 'status' => 'active' ) );
+	$inactive_count = $rcp_levels_db->count( array( 'status' => 'inactive' ) );
 	?>
 	<div class="wrap">
 		<?php if(isset($_GET['edit_subscription'])) :
 			include('edit-subscription.php');
 		else : ?>
 			<h1><?php _e('Subscription Levels', 'rcp'); ?></h1>
+
+			<ul class="subsubsub">
+				<li>
+					<a href="<?php echo esc_url( remove_query_arg( 'status', $page ) ); ?>" title="<?php esc_attr_e( 'View all subscription levels', 'rcp' ); ?>"<?php echo 'all' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'All', 'rcp' ); ?>
+						<span class="count">(<?php echo $all_count; ?>)</span>
+					</a>
+				</li>
+				<?php if ( $active_count > 0 ) : ?>
+					<li>
+						|<a href="<?php echo esc_url( add_query_arg( 'status', 'active', $page ) ); ?>" title="<?php esc_attr_e( 'View active subscription levels', 'rcp' ); ?>"<?php echo 'active' == $status ? ' class="current"' : ''; ?>>
+							<?php _e( 'Active', 'rcp' ); ?>
+							<span class="count">(<?php echo $active_count; ?>)</span>
+						</a>
+					</li>
+				<?php endif; ?>
+				<?php if ( $inactive_count > 0 ) : ?>
+					<li>
+						|<a href="<?php echo esc_url( add_query_arg( 'status', 'inactive', $page ) ); ?>" title="<?php esc_attr_e( 'View inactive subscription levels', 'rcp' ); ?>"<?php echo 'inactive' == $status ? ' class="current"' : ''; ?>>
+							<?php _e( 'Inactive', 'rcp' ); ?>
+							<span class="count">(<?php echo $inactive_count; ?>)</span>
+						</a>
+					</li>
+				<?php endif; ?>
+			</ul>
+
 			<table class="wp-list-table widefat fixed posts rcp-subscriptions">
 				<thead>
 					<tr>
-						<th scope="col" class="rcp-sub-name-col column-primary"><?php _e('Name', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-desc-col"><?php _e('Description', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-level-col"><?php _e('Access Level', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-duration-col"><?php _e('Duration', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-price-col"><?php _e('Price', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-subs-col"><?php _e('Subscribers', 'rcp'); ?></th>
+						<th scope="col" class="rcp-sub-name-col column-primary"><?php _e( 'Name', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-desc-col"><?php _e( 'Description', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-status-col"><?php _e( 'Status', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-level-col"><?php _e( 'Access Level', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-duration-col"><?php _e( 'Duration', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-price-col"><?php _e( 'Price', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-subs-col"><?php _e( 'Subscribers', 'rcp' ); ?></th>
 						<?php do_action('rcp_levels_page_table_header'); ?>
-						<th scope="col" class="rcp-sub-order-col"><?php _e('Order', 'rcp'); ?></th>
+						<th scope="col" class="rcp-sub-order-col"><?php _e( 'Order', 'rcp' ); ?></th>
 					</tr>
 				</thead>
 				<tbody id="the-list">
-				<?php $levels = rcp_get_subscription_levels( 'all' ); ?>
+				<?php $levels = rcp_get_subscription_levels( $status ); ?>
 				<?php
 				if($levels) :
 					$i = 1;
 					foreach( $levels as $key => $level) : ?>
 						<tr id="recordsArray_<?php echo $level->id; ?>" class="rcp-subscription rcp_row <?php if(rcp_is_odd($i)) { echo 'alternate'; } ?>">
-							<td class="rcp-sub-name-col column-primary has-row-actions" data-colname="<?php _e( 'Name', 'rcp' ); ?>">
+							<td class="rcp-sub-name-col column-primary has-row-actions" data-colname="<?php esc_attr_e( 'Name', 'rcp' ); ?>">
 								<strong><a href="<?php echo esc_url( add_query_arg( 'edit_subscription', $level->id, $page ) ); ?>"><?php echo stripslashes( $level->name ); ?></a></strong>
 								<?php if( current_user_can( 'rcp_manage_levels' ) ) : ?>
 									<div class="row-actions">
-										<span class="rcp-sub-id-col" data-colname="<?php _e( 'ID:', 'rcp' ); ?>"> <?php echo __( 'ID:', 'rcp' ) . ' ' . $level->id; ?> | </span>
+										<span class="rcp-sub-id-col" data-colname="<?php esc_attr_e( 'ID:', 'rcp' ); ?>"> <?php echo __( 'ID:', 'rcp' ) . ' ' . $level->id; ?> | </span>
 										<a href="<?php echo esc_url( add_query_arg('edit_subscription', $level->id, $page) ); ?>"><?php _e('Edit', 'rcp'); ?></a> |
 										<?php if($level->status != 'inactive') { ?>
 											<a href="<?php echo esc_url( add_query_arg('deactivate_subscription', $level->id, $page) ); ?>"><?php _e('Deactivate', 'rcp'); ?></a> |
@@ -58,9 +91,10 @@ function rcp_member_levels_page() {
 								<?php endif; ?>
 								<button type="button" class="toggle-row"><span class="screen-reader-text"><?php _e( 'Show more details', 'rcp' ); ?></span></button>
 							</td>
-							<td class="rcp-sub-desc-col" data-colname="<?php _e( 'Description', 'rcp' ); ?>"><?php echo stripslashes( $level->description ); ?></td>
-							<td class="rcp-sub-level-col" data-colname="<?php _e( 'Access Level', 'rcp' ); ?>"><?php echo $level->level != '' ? $level->level : __('none', 'rcp'); ?></td>
-							<td class="rcp-sub-duration-col" data-colname="<?php _e( 'Duration', 'rcp' ); ?>">
+							<td class="rcp-sub-desc-col" data-colname="<?php esc_attr_e( 'Description', 'rcp' ); ?>"><?php echo stripslashes( $level->description ); ?></td>
+							<td class="rcp-sub-status-col" data-colname="<?php esc_attr_e( 'Status', 'rcp' ); ?>"><?php echo ucwords( $level->status ); ?></td>
+							<td class="rcp-sub-level-col" data-colname="<?php esc_attr_e( 'Access Level', 'rcp' ); ?>"><?php echo $level->level != '' ? $level->level : __('none', 'rcp'); ?></td>
+							<td class="rcp-sub-duration-col" data-colname="<?php esc_attr_e( 'Duration', 'rcp' ); ?>">
 								<?php
 									if($level->duration > 0) {
 										echo $level->duration . ' ' . rcp_filter_duration_unit($level->duration_unit, $level->duration);
@@ -69,7 +103,7 @@ function rcp_member_levels_page() {
 									}
 								?>
 							</td>
-							<td class="rcp-sub-price-col" data-colname="<?php _e( 'Price', 'rcp' ); ?>">
+							<td class="rcp-sub-price-col" data-colname="<?php esc_attr_e( 'Price', 'rcp' ); ?>">
 								<?php
 								$price = rcp_get_subscription_price( $level->id );
 								if( ! $price ) {
@@ -79,7 +113,7 @@ function rcp_member_levels_page() {
 								}
 								?>
 							</td>
-							<td class="rcp-sub-subs-col" data-colname="<?php _e( 'Subscribers', 'rcp' ); ?>">
+							<td class="rcp-sub-subs-col" data-colname="<?php esc_attr_e( 'Subscribers', 'rcp' ); ?>">
 								<?php
 								if( $price || $level->duration > 0 ) {
 									echo rcp_get_subscription_member_count( $level->id, 'active' );
@@ -99,14 +133,15 @@ function rcp_member_levels_page() {
 				</tbody>
 				<tfoot>
 					<tr>
-						<th scope="col" class="rcp-sub-name-col column-primary"><?php _e('Name', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-desc-col"><?php _e('Description', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-level-col"><?php _e('Access Level', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-duration-col"><?php _e('Duration', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-price-col"><?php _e('Price', 'rcp'); ?></th>
-						<th scope="col" class="rcp-sub-subs-col"><?php _e('Subscribers', 'rcp'); ?></th>
+						<th scope="col" class="rcp-sub-name-col column-primary"><?php _e( 'Name', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-desc-col"><?php _e( 'Description', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-status-col"><?php _e( 'Status', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-level-col"><?php _e( 'Access Level', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-duration-col"><?php _e( 'Duration', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-price-col"><?php _e( 'Price', 'rcp' ); ?></th>
+						<th scope="col" class="rcp-sub-subs-col"><?php _e( 'Subscribers', 'rcp' ); ?></th>
 						<?php do_action('rcp_levels_page_table_footer'); ?>
-						<th scope="col" class="rcp-sub-order-col"><?php _e('Order', 'rcp'); ?></th>
+						<th scope="col" class="rcp-sub-order-col"><?php _e( 'Order', 'rcp' ); ?></th>
 					</tr>
 				</tfoot>
 			</table>

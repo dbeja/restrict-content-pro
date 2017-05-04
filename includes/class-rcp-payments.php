@@ -203,6 +203,14 @@ class RCP_Payments {
 
 		global $wpdb;
 		do_action( 'rcp_update_payment', $payment_id, $payment_data );
+
+		if ( array_key_exists( 'status', $payment_data ) ) {
+			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => '', 's' => '' ) ) ) );
+			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => 'pending', 's' => '' ) ) ) );
+			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => 'complete', 's' => '' ) ) ) );
+			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => 'refunded', 's' => '' ) ) ) );
+		}
+
 		return $wpdb->update( $this->db_name, $payment_data, array( 'id' => $payment_id ) );
 	}
 
@@ -301,41 +309,41 @@ class RCP_Payments {
 
 		$args  = wp_parse_args( $args, $defaults );
 
-		$where = '';
+		$where  = ' WHERE 1=1 ';
+		$values = array();
 
 		// payments for a specific subscription level
 		if( ! empty( $args['subscription'] ) ) {
-			$where .= "WHERE `subscription`= '{$args['subscription']}' ";
+			$where   .= " AND `subscription`= %s ";
+			$values[] = $args['subscription'];
 		}
 
 		// payments for specific users
 		if( ! empty( $args['user_id'] ) ) {
 
-			if( is_array( $args['user_id'] ) )
-				$user_ids = implode( ',', $args['user_id'] );
-			else
-				$user_ids = intval( $args['user_id'] );
-
-			if( ! empty( $args['subscription'] ) ) {
-				$where .= "AND `user_id` IN( {$user_ids} ) ";
+			if( is_array( $args['user_id'] ) ) {
+				$user_ids = implode( ',', array_map( 'absint', $args['user_id'] ) );
 			} else {
-				$where .= "WHERE `user_id` IN( {$user_ids} ) ";
+				$user_ids = intval( $args['user_id'] );
 			}
+
+			$where .= " AND `user_id` IN( {$user_ids} ) ";
 
 		}
 
 		// payments for specific statuses
 		if( ! empty( $args['status'] ) ) {
 
-			if( is_array( $args['status'] ) )
-				$statuss = implode( ',', $args['status'] );
-			else
-				$statuss = intval( $args['status'] );
+			if( is_array( $args['status'] ) ) {
+				$status_count       = count( $args['status'] );
+				$status_placeholder = array_fill( 0, $status_count, '%s' );
+				$statuses           = implode( ', ', $status_placeholder );
 
-			if( ! empty( $args['subscription'] ) || ! empty( $args['user_id'] ) ) {
-				$where .= "AND `status` IN( {$statuss} ) ";
+				$where .= "AND `status` IN ( $statuses )";
+				$values = $values + $args['status'];
 			} else {
-				$where .= "WHERE `status` IN( {$statuss} ) ";
+				$where   .= "AND `status` = %s";
+				$values[] = $args['status'];
 			}
 
 		}
@@ -358,11 +366,7 @@ class RCP_Payments {
 				$date_where = $day . " = DAY ( date ) AND " . $date_where;
 			}
 
-			if( ! empty( $args['user_id'] ) || ! empty( $args['subscription'] ) ) {
-				$where .= "AND (" . $date_where . ")";
-			} else {
-				$where .= "WHERE ( " . $date_where . " ) ";
-			}
+			$where .= " AND (" . $date_where . ")";
 		}
 
 		// Fields to return
@@ -372,19 +376,18 @@ class RCP_Payments {
 			$fields = '*';
 		}
 
+		// Search
 		if( ! empty( $args['s'] ) ) {
-
-			if( empty( $where ) )
-				$where = "WHERE ";
-			else
-				$where = " AND ";
 
 			// Search by email
 			if( is_email( $args['s'] ) ) {
 
 				$user = get_user_by( 'email', $args['s'] );
 
-				$where .= "`user_id`=$user->ID ";
+				if ( is_a( $user, 'WP_User' ) ) {
+					$where   .= " AND `user_id` = %d";
+					$values[] = $user->ID;
+				}
 
 			} else {
 
@@ -393,14 +396,17 @@ class RCP_Payments {
 				// Search by subscription key
 				if( strlen( $args['s'] ) == 32 ) {
 
-					$where .= "`subscription_key`= '{$args['s']}' ";
+					$where   .= " AND `subscription_key` = %s";
+					$values[] = $args['s'];
 
 				} elseif( $levels_db->get_level_by( 'name', $args['s'] ) ) {
 
 					// Matching subscription level found so search for payments with this level
-					$where .= "`subscription`= '{$args['s']}' ";
+					$where   .= " AND `subscription` = %s";
+					$values[] = $args['s'];
 				} else {
-					$where .= "`transaction_id`='{$args['s']}' ";
+					$where   .= " AND `transaction_id` = %s";
+					$values[] = $args['s'];
 				}
 			}
 
@@ -424,7 +430,10 @@ class RCP_Payments {
 
 		$orderby = array_key_exists( $args['orderby'], $columns ) ? $args['orderby'] : 'id';
 
-		$payments = $wpdb->get_results( $wpdb->prepare( "SELECT {$fields} FROM " . $this->db_name . " {$where}ORDER BY {$orderby} {$order} LIMIT %d,%d;", absint( $args['offset'] ), absint( $args['number'] ) ) );
+		$values[] = absint( $args['offset'] );
+		$values[] = absint( $args['number'] );
+
+		$payments = $wpdb->get_results( $wpdb->prepare( "SELECT {$fields} FROM " . $this->db_name . " {$where} ORDER BY {$orderby} {$order} LIMIT %d,%d;", $values ) );
 
 		return $payments;
 
@@ -446,49 +455,97 @@ class RCP_Payments {
 
 		$defaults = array(
 			'user_id' => 0,
-			'status'  => ''
+			'status'  => '',
+		    's'       => ''
 		);
 
 		$args  = wp_parse_args( $args, $defaults );
 
-		$where = '';
+		$where  = ' WHERE 1=1 ';
+		$values = array();
 
+		// Filter by user ID
 		if( ! empty( $args['user_id'] ) ) {
 
-			if( is_array( $args['user_id'] ) )
-				$user_ids = implode( ',', $args['user_id'] );
-			else
+			if( is_array( $args['user_id'] ) ) {
+				$user_ids = implode( ',', array_map( 'absint', $args['user_id'] ) );
+			} else {
 				$user_ids = intval( $args['user_id'] );
+			}
 
-			$where .= " WHERE `user_id` IN( {$user_ids} ) ";
+			$where .= " AND `user_id` IN( {$user_ids} ) ";
 
 		}
 
+		// Filter by status
 		if( ! empty( $args['status'] ) ) {
 
 			if( is_array( $args['status'] ) ) {
-				$statuss = implode( ',', $args['status'] );
-			} else {
-				$statuss = intval( $args['status'] );
-			}
+				$status_count       = count( $args['status'] );
+				$status_placeholder = array_fill( 0, $status_count, '%s' );
+				$statuses           = implode( ', ', $status_placeholder );
 
-			if( ! empty( $args['user_id'] ) ) {
-				$where .= " AND `status` IN( {$statuss} ) ";
+				$where .= "AND `status` IN ( $statuses )";
+				$values = $values + $args['status'];
 			} else {
-				$where .= " WHERE `status` IN( {$statuss} ) ";
+				$where   .= "AND `status` = %s";
+				$values[] = $args['status'];
 			}
 
 		}
 
-		$key   = md5( 'rcp_payments_' . serialize( $args ) );
+		// Search
+		if( ! empty( $args['s'] ) ) {
+
+			// Search by email
+			if( is_email( $args['s'] ) ) {
+
+				$user = get_user_by( 'email', $args['s'] );
+
+				if ( is_a( $user, 'WP_User' ) ) {
+					$where   .= " AND `user_id` = %d";
+					$values[] = $user->ID;
+				}
+
+			} else {
+
+				$levels_db = new RCP_Levels;
+
+				// Search by subscription key
+				if( strlen( $args['s'] ) == 32 ) {
+
+					$where   .= " AND `subscription_key` = %s";
+					$values[] = $args['s'];
+
+				} elseif( $levels_db->get_level_by( 'name', $args['s'] ) ) {
+
+					// Matching subscription level found so search for payments with this level
+					$where   .= " AND `subscription` = %s";
+					$values[] = $args['s'];
+				} else {
+					$where   .= " AND `transaction_id` = %s";
+					$values[] = $args['s'];
+				}
+			}
+
+		}
+
+		$key   = md5( 'rcp_payments_count_' . serialize( $args ) );
 		$count = get_transient( $key );
 
 		if( $count === false ) {
-			$count = $wpdb->get_var( "SELECT COUNT(ID) FROM " . $this->db_name . "{$where};" );
+
+			$query = "SELECT COUNT(ID) FROM " . $this->db_name . "{$where};";
+
+			if ( ! empty( $values ) ) {
+				$query = $wpdb->prepare( $query, $values );
+			}
+
+			$count = $wpdb->get_var( $query );
 			set_transient( $key, $count, 10800 );
 		}
 
-		return $count;
+		return absint( $count );
 
 	}
 
@@ -519,26 +576,22 @@ class RCP_Payments {
 		$cache_args['date'] = implode( ',', $args['date'] );
 		$cache_key = md5( implode( ',', $cache_args ) );
 
-		$where = '';
+		$where = ' WHERE 1=1 ';
 
 		// payments for a specific subscription level
 		if( ! empty( $args['subscription'] ) ) {
-			$where .= "WHERE `subscription`= '{$args['subscription']}' ";
+			$where .= $wpdb->prepare( " AND `subscription` = %s ", $args['subscription'] );
 		}
 
 		// payments for specific users
 		if( ! empty( $args['user_id'] ) ) {
 
 			if( is_array( $args['user_id'] ) )
-				$user_ids = implode( ',', $args['user_id'] );
+				$user_ids = implode( ',', array_map( 'absint', $args['user_id'] ) );
 			else
 				$user_ids = intval( $args['user_id'] );
 
-			if( ! empty( $args['subscription'] ) ) {
-				$where .= "`user_id` IN( {$user_ids} ) ";
-			} else {
-				$where .= "WHERE `user_id` IN( {$user_ids} ) ";
-			}
+			$where .= " AND `user_id` IN( {$user_ids} ) ";
 
 		}
 
@@ -560,23 +613,11 @@ class RCP_Payments {
 				$date_where = $day . " = DAY ( date ) AND " . $date_where;
 			}
 
-			if( ! empty( $args['user_id'] ) || ! empty( $args['subscription'] ) ) {
-				$where .= "AND (" . $date_where . ") ";
-			} else {
-				$where .= "WHERE ( " . $date_where . " ) ";
-			}
+			$where .= " AND (" . $date_where . ") ";
 		}
 
 		// Exclude refunded payments
-		if( false !== strpos( $where, 'WHERE' ) ) {
-
-			$where .= "AND ( `status` = 'complete' OR `status` IS NULL )";
-
-		} else {
-
-			$where .= "WHERE ( `status` = 'complete' OR `status` IS NULL )";
-
-		}
+		$where .= " AND ( `status` = 'complete' OR `status` IS NULL )";
 
 		$earnings = get_transient( $cache_key );
 

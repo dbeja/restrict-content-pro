@@ -1081,7 +1081,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 		$force_now = $member->is_recurring();
 		$prorated  = $member->get_prorate_credit_amount();
 
-		if ( ! $force_now && ! empty( $prorated ) ) {
+		if ( ! $force_now && ! empty( $prorated ) && rcp_get_subscription_id() != $subscription_level->id ) {
 			$force_now = true;
 		}
 

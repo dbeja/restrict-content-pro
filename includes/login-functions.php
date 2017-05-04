@@ -130,7 +130,7 @@ function rcp_process_login_form() {
 		rcp_login_user_in( $user->ID, $_POST['rcp_user_login'], $remember );
 
 		// redirect the user back to the page they were previously on
-		wp_redirect( apply_filters( 'rcp_login_redirect_url', $redirect, $user ) ); exit;
+		wp_safe_redirect( apply_filters( 'rcp_login_redirect_url', esc_url_raw( $redirect ), $user ) ); exit;
 
 	} else {
 

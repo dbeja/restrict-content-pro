@@ -306,6 +306,10 @@
 	display: inline-block;
 }
 
+.restrict_page_rcp-payments .total {
+	clear: both;
+}
+
 /* Error Logs
 -------------------------------------------------------------- */
 

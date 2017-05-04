@@ -13,11 +13,13 @@
 /**
  * Retrieves all discount codes
  *
+ * @param array $args Arguments to override the defaults.
+ *
  * @return array|bool
  */
-function rcp_get_discounts() {
+function rcp_get_discounts( $args = array() ) {
 	$discounts_db = new RCP_Discounts();
-	$discounts    = $discounts_db->get_discounts();
+	$discounts    = $discounts_db->get_discounts( $args );
 	if( $discounts ) {
 		return $discounts;
 	}

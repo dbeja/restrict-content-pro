@@ -14,14 +14,48 @@
  * @return void
  */
 function rcp_discounts_page() {
-	global $rcp_options, $rcp_discounts_db_name, $wpdb;
-	$page = admin_url( '/admin.php?page=rcp-discounts' );
+	/**
+	 * @var RCP_Discounts $rcp_discounts_db
+	 */
+	global $rcp_discounts_db;
+	$page   = admin_url( '/admin.php?page=rcp-discounts' );
+	$status = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : 'all';
+
+	// Query counts.
+	$all_count      = $rcp_discounts_db->count();
+	$active_count   = $rcp_discounts_db->count( array( 'status' => 'active' ) );
+	$inactive_count = $rcp_discounts_db->count( array( 'status' => 'disabled' ) );
 	?>
 	<div class="wrap">
 		<?php if( isset( $_GET['edit_discount'] ) ) :
 			include('edit-discount.php');
 		else : ?>
 			<h1><?php _e( 'Discount Codes', 'rcp' ); ?></h1>
+
+			<ul class="subsubsub">
+				<li>
+					<a href="<?php echo esc_url( remove_query_arg( 'status', $page ) ); ?>" title="<?php esc_attr_e( 'View all discount codes', 'rcp' ); ?>"<?php echo 'all' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'All', 'rcp' ); ?>
+						<span class="count">(<?php echo $all_count; ?>)</span>
+					</a>
+				</li>
+				<?php if ( $active_count > 0 ) : ?>
+					<li>
+						|<a href="<?php echo esc_url( add_query_arg( 'status', 'active', $page ) ); ?>" title="<?php esc_attr_e( 'View active discount codes', 'rcp' ); ?>"<?php echo 'active' == $status ? ' class="current"' : ''; ?>>
+							<?php _e( 'Active', 'rcp' ); ?>
+							<span class="count">(<?php echo $active_count; ?>)</span>
+						</a>
+					</li>
+				<?php endif; ?>
+				<?php if ( $inactive_count > 0 ) : ?>
+					<li>
+						|<a href="<?php echo esc_url( add_query_arg( 'status', 'disabled', $page ) ); ?>" title="<?php esc_attr_e( 'View inactive discount codes', 'rcp' ); ?>"<?php echo 'disabled' == $status ? ' class="current"' : ''; ?>>
+							<?php _e( 'Inactive', 'rcp' ); ?>
+							<span class="count">(<?php echo $inactive_count; ?>)</span>
+						</a>
+					</li>
+				<?php endif; ?>
+			</ul>
 
 			<table class="wp-list-table widefat posts">
 				<thead>
@@ -40,7 +74,7 @@ function rcp_discounts_page() {
 					</tr>
 				</thead>
 				<tbody>
-				<?php $codes = rcp_get_discounts(); ?>
+				<?php $codes = rcp_get_discounts( array( 'status' => $status ) ); ?>
 				<?php
 				if($codes) :
 					$i = 1;

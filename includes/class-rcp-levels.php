@@ -3,7 +3,7 @@
  * RCP Subscription Levels class
  *
  * This class handles querying, inserting, updating, and removing subscription levels
- * Also includes other discount helper functions
+ * Also includes other subscription level helper functions
  *
  * @package     Restrict Content Pro
  * @subpackage  Classes/Subscription Levels
@@ -131,9 +131,9 @@ class RCP_Levels {
 		$args = wp_parse_args( $args, $defaults );
 
 		if( $args['status'] == 'active' ) {
-			$where = "WHERE `status` !='inactive'";
+			$where = "WHERE `status` = 'active'";
 		} elseif( $args['status'] == 'inactive' ) {
-			$where = "WHERE `status` ='{$status}'";
+			$where = "WHERE `status` = 'inactive'";
 		} else {
 			$where = "";
 		}
@@ -162,6 +162,45 @@ class RCP_Levels {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Count the total number of subscription levels in the database
+	 *
+	 * @param array $args Query arguments to override the defaults.
+	 *
+	 * @access public
+	 * @return int
+	 */
+	public function count( $args = array() ) {
+
+		global $wpdb;
+
+		$defaults = array(
+			'status' => 'all'
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$where = '';
+
+		// Filter by status.
+		if ( $args['status'] == 'active' ) {
+			$where = "WHERE `status` = 'active'";
+		} elseif ( $args['status'] == 'inactive' ) {
+			$where = "WHERE `status` = 'inactive'";
+		}
+
+		$key   = md5( 'rcp_levels_count_' . serialize( $args ) );
+		$count = get_transient( $key );
+
+		if ( false === $count ) {
+			$count = $wpdb->get_var( "SELECT COUNT(ID) FROM {$this->db_name} {$where}" );
+			set_transient( $key, $count, 10800 );
+		}
+
+		return $count;
+
 	}
 
 
@@ -292,15 +331,17 @@ class RCP_Levels {
 
 			$level_id = $wpdb->insert_id;
 
-			$args = array(
+			$cache_args = array(
 				'status'  => 'all',
 				'limit'   => null,
 				'orderby' => 'list_order'
 			);
 
-			$cache_key = md5( implode( '|', $args ) );
+			$cache_key = md5( implode( '|', $cache_args ) );
 
 			wp_cache_delete( $cache_key, 'rcp' );
+			delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'all' ) ) ) );
+			delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => $args['status'] ) ) ) );
 
 			do_action( 'rcp_add_subscription', $level_id, $args );
 
@@ -401,6 +442,9 @@ class RCP_Levels {
 
 		wp_cache_delete( $cache_key, 'rcp' );
 		wp_cache_delete( 'level_' . $level_id, 'rcp' );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'all' ) ) ) );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'active' ) ) ) );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'inactive' ) ) ) );
 
 		do_action( 'rcp_edit_subscription_level', absint( $args['id'] ), $args );
 
@@ -435,6 +479,9 @@ class RCP_Levels {
 		$cache_key = md5( implode( '|', $args ) );
 
 		wp_cache_delete( $cache_key, 'rcp' );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'all' ) ) ) );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'active' ) ) ) );
+		delete_transient( md5( 'rcp_levels_count_' . serialize( array( 'status' => 'inactive' ) ) ) );
 
 		do_action( 'rcp_remove_level', absint( $level_id ) );
 
