@@ -336,7 +336,6 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 	} else {
 
 		include( RCP_PLUGIN_DIR . 'includes/content-filters.php' );
-		include( RCP_PLUGIN_DIR . 'includes/feed-functions.php' );
 		require_once( RCP_PLUGIN_DIR . 'includes/captcha-functions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/query-filters.php' );
 		include( RCP_PLUGIN_DIR . 'includes/redirects.php' );

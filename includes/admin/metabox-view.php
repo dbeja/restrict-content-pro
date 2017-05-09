@@ -18,7 +18,6 @@ $access_level      = get_post_meta( get_the_ID(), 'rcp_access_level', true );
 $access_level      = is_numeric( $access_level ) ? absint( $access_level ) : '';
 $content_excerpts  = isset( $rcp_options['content_excerpts'] ) ? $rcp_options['content_excerpts'] : 'individual';
 $show_excerpt      = 'always' === $content_excerpts || ( 'individual' === $content_excerpts && get_post_meta( get_the_ID(), 'rcp_show_excerpt', true ) );
-$hide_in_feed      = get_post_meta( get_the_ID(), 'rcp_hide_from_feed', true );
 $user_role         = get_post_meta( get_the_ID(), 'rcp_user_level', true );
 $access_display    = is_numeric( $access_level ) ? '' : ' style="display:none;"';
 $level_set_display = ! empty( $sub_levels ) || ! empty( $is_paid ) ? '' : ' style="display:none;"';
@@ -107,12 +106,6 @@ $role_set_display  = '' != $user_role ? '' : ' style="display:none;"';
 				<?php _e( 'Show excerpt to members without access to this content.', 'rcp' ); ?>
 			</label>
 			<span alt="f223" class="rcp-help-tip dashicons dashicons-editor-help" title="<?php echo esc_attr( $message ); ?>"></span>
-		</p>
-		<p>
-			<label for="rcp-hide-in-feed">
-				<input type="checkbox" name="rcp_hide_from_feed" id="rcp-hide-in-feed" value="1"<?php checked( true, $hide_in_feed ); ?>/>
-				<?php _e( 'Hide this content and excerpt from RSS feeds.', 'rcp' ); ?>
-			</label>
 		</p>
 		<p>
 			<?php printf(

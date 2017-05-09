@@ -454,3 +454,34 @@ function rcp_filter_restricted_category_content( $content ) {
 
 }
 // add_filter( 'the_content', 'rcp_filter_restricted_category_content', 101 );
+
+/**
+ * Filter content in RSS feeds.
+ *
+ * @deprecated 2.9 The "hide from feed" meta field was removed and content is already filtered for RSS
+ *                 feeds in rcp_filter_restricted_content().
+ * @see        rcp_filter_restricted_content()
+ *
+ * @param string $content
+ *
+ * @return string
+ */
+function rcp_filter_feed_posts( $content ) {
+	global $rcp_options;
+
+	if( ! is_feed() )
+		return $content;
+
+	$hide_from_feed = get_post_meta( get_the_ID(), 'rcp_hide_from_feed', true );
+	if ( $hide_from_feed == 'on' ) {
+		if( rcp_is_paid_content( get_the_ID() ) ) {
+			return rcp_format_teaser( $rcp_options['paid_message'] );
+		} else {
+			return rcp_format_teaser( $rcp_options['free_message'] );
+		}
+	}
+	return do_shortcode( $content );
+
+}
+//add_action( 'the_excerpt', 'rcp_filter_feed_posts' );
+//add_action( 'the_content', 'rcp_filter_feed_posts' );
