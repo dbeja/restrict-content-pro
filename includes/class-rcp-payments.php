@@ -100,10 +100,10 @@ class RCP_Payments {
 		// Backwards compatibility: update pending payment instead of creating a new one.
 		if ( ! empty( $args['user_id'] ) && 'complete' == $args['status'] ) {
 			$last_pending_payment = get_user_meta( $args['user_id'], 'rcp_pending_payment_id', true );
-			$pending_payment      = new RCP_Payment( $last_pending_payment );
+			$pending_payment      = ! empty( $last_pending_payment ) ? $this->get_payment( $last_pending_payment ) : false;
 
-			if ( ! empty( $pending_payment->id ) && $args['amount'] == $pending_payment->amount && $args['subscription'] == $pending_payment->subscription ) {
-				$pending_payment->update( $args );
+			if ( ! empty( $pending_payment ) && $args['amount'] == $pending_payment->amount && $args['subscription'] == $pending_payment->subscription ) {
+				$this->update( $pending_payment->id, $args );
 
 				return $pending_payment->id;
 			}
@@ -115,7 +115,6 @@ class RCP_Payments {
 		if( $add ) {
 
 			$payment_id = $wpdb->insert_id;
-			$payment    = new RCP_Payment( $payment_id );
 
 			// clear the payment caches
 			delete_transient( 'rcp_earnings' );
@@ -130,15 +129,14 @@ class RCP_Payments {
 			 *
 			 * @see RCP_Payment::update() - Action is also run here when status is changed.
 			 *
-			 * @param string      $new_status New status being set.
-			 * @param string      $old_status Previous status before the update.
-			 * @param int         $payment_id ID of the payment.
-			 * @param RCP_Payment $payment    Payment object.
+			 * @param string $new_status New status being set.
+			 * @param int    $payment_id ID of the payment.
+			 * @param array  $args       Array of all payment data.
 			 *
 			 * @since 2.9
 			 */
-			do_action( 'rcp_update_payment_status', $args['status'], 'pending', $payment_id, $payment );
-			do_action( 'rcp_update_payment_status_' . $args['status'], 'pending', $payment_id, $payment );
+			do_action( 'rcp_update_payment_status', $args['status'], $payment_id, $args );
+			do_action( 'rcp_update_payment_status_' . $args['status'], $payment_id, $args );
 
 			if ( 'complete' == $args['status'] ) {
 				/**
@@ -211,7 +209,43 @@ class RCP_Payments {
 			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => 'refunded', 's' => '' ) ) ) );
 		}
 
-		return $wpdb->update( $this->db_name, $payment_data, array( 'id' => $payment_id ) );
+		$updated = $wpdb->update( $this->db_name, $payment_data, array( 'id' => $payment_id ) );
+
+		if ( $updated && array_key_exists( 'status', $payment_data ) ) {
+
+			/**
+			 * Triggers when the payment's status is changed.
+			 *
+			 * @param string $new_status   New status being set.
+			 * @param int    $payment_id   ID of the payment.
+			 * @param array  $payment_data Array of all data being changed in this update.
+			 *
+			 * @since 2.9
+			 */
+			do_action( 'rcp_update_payment_status', $payment_data['status'], $payment_id, $payment_data );
+			do_action( 'rcp_update_payment_status_' . $payment_data['status'], $payment_id, $payment_data );
+
+			if ( 'complete' == $payment_data['status'] ) {
+				$payment = $this->get_payment( $payment_id );
+				$amount  = ! empty( $payment->amount ) ? $payment->amount : 0.00;
+
+				/**
+				 * Runs only when a payment is updated to "complete". This is to
+				 * ensure backwards compatibility from before payments were inserted
+				 * as "pending" before payment is taken.
+				 *
+				 * @see RCP_Payments::insert() - Action is also run here.
+				 *
+				 * @param int   $payment_id ID of the payment that was just updated.
+				 * @param array $args       Array of payment information that was just updated.
+				 * @param float $amount     Amount the payment was for.
+				 */
+				do_action( 'rcp_insert_payment', $payment_id, $payment_data, $amount);
+			}
+
+		}
+
+		return $updated;
 	}
 
 
@@ -247,11 +281,109 @@ class RCP_Payments {
 
 		$payment = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->db_name} WHERE id = %d", absint( $payment_id ) ) );
 
-		if( empty( $payment->status ) ) {
+		$data_to_update = array();
+
+		if ( empty( $payment->status ) ) {
 			$payment->status = 'complete';
 		}
 
+		// Back-fill subscription level ID (added in version 2.9).
+		if ( empty( $payment->subscription_level_id ) ) {
+
+			// Get the level ID from the name and update it in the database.
+			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
+
+			if ( ! empty( $subscription ) ) {
+				$payment->subscription_level_id          = absint( $subscription->id );
+				$data_to_update['subscription_level_id'] = absint( $subscription->id );
+			}
+
+		}
+
+		// Back-fill gateway (added in version 2.9).
+		if ( empty( $payment->gateway ) && ! empty( $payment->payment_type ) ) {
+
+			$gateway = $this->get_payment_gateway( $payment );
+
+			if ( ! empty( $gateway ) ) {
+				$data_to_update['gateway'] = $gateway;
+			}
+
+		}
+
+		// Update any data.
+		if ( ! empty( $data_to_update ) ) {
+			$this->update( $payment->id, $data_to_update );
+		}
+
 		return $payment;
+
+	}
+
+	/**
+	 * Attempt to guess the payment gateway from the "Payment Type"
+	 *
+	 * @param int|object $_payment_id_or_object Payment ID or database object.
+	 *
+	 * @access private
+	 * @since 2.9
+	 * @return string|false
+	 */
+	private function get_payment_gateway( $_payment_id_or_object ) {
+
+		if ( is_object( $_payment_id_or_object ) ) {
+			$payment = $_payment_id_or_object;
+		} elseif ( is_numeric( $_payment_id_or_object ) ) {
+			$payment = $this->get_payment( $_payment_id_or_object );
+		}
+
+		if ( empty( $payment ) ) {
+			return false;
+		}
+
+		$type    = strtolower( $payment->payment_type );
+		$gateway = false;
+
+		// If we already have a gateway in the DB, use that.
+		if ( ! empty( $payment->gateway ) ) {
+			return $payment->gateway;
+		}
+
+		// If "Payment Type" isn't set, we can't get the gateway.
+		if ( empty( $type ) ) {
+			return $gateway;
+		}
+
+		switch ( $type ) {
+
+			case 'web_accept' :
+			case 'paypal express one time' :
+			case 'recurring_payment' :
+			case 'subscr_payment' :
+			case 'recurring_payment_profile_created' :
+				$gateway = 'paypal';
+				break;
+
+			case 'credit card' :
+			case 'credit card one time' :
+				if ( false !== strpos( $payment->transaction_id, 'ch_' ) ) {
+					$gateway = 'stripe';
+				} elseif ( false !== strpos( $payment->transaction_id, 'anet_' ) ) {
+					$gateway = 'authorizenet';
+				} elseif ( is_numeric( $payment->transaction_id ) ) {
+					$gateway = 'twocheckout';
+				}
+				break;
+
+			case 'braintree credit card one time' :
+			case 'braintree credit card initial payment' :
+			case 'braintree credit card' :
+				$gateway = 'braintree';
+				break;
+
+		}
+
+		return $gateway;
 
 	}
 
@@ -434,6 +566,27 @@ class RCP_Payments {
 		$values[] = absint( $args['number'] );
 
 		$payments = $wpdb->get_results( $wpdb->prepare( "SELECT {$fields} FROM " . $this->db_name . " {$where} ORDER BY {$orderby} {$order} LIMIT %d,%d;", $values ) );
+
+		foreach ( $payments as $key => $payment ) {
+
+			/*
+			 * Make sure the subscription level ID exists for each payment.
+			 * subscription_level_id was added in 2.9 and we need to back-fill the data.
+			 */
+
+			if ( ! empty( $payment->subscription_level_id ) ) {
+				continue;
+			}
+
+			if ( empty( $subscription = rcp_get_subscription_details_by_name( $payment->subscription ) ) ) {
+				continue;
+			}
+
+			$payment->subscription_level_id = $subscription->id;
+
+			$payments[ $key ] = $payment;
+
+		}
 
 		return $payments;
 

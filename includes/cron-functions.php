@@ -217,10 +217,7 @@ function rcp_mark_abandoned_payments() {
 
 	if ( $payments ) {
 		foreach ( $payments as $payment ) {
-			$payment_obj = new RCP_Payment( $payment->id );
-			$payment_obj->update( array(
-				'status' => 'abandoned'
-			) );
+			$rcp_payments_db->update( $payment->id, array( 'status' => 'abandoned' ) );
 		}
 	}
 

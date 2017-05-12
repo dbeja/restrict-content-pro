@@ -231,8 +231,7 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 				$pending_payment_id = $member->get_pending_payment_id();
 				if ( ! empty( $pending_payment_id ) ) {
 					// Completing a pending payment (this will be the first payment made via registration).
-					$payment = new RCP_Payment( absint( $pending_payment_id ) );
-					$payment->update( $payment_data );
+					$rcp_payments_db->update( absint( $pending_payment_id ), $payment_data );
 				} else {
 					$payments->insert( $payment_data );
 				}

@@ -252,7 +252,6 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-integrations.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-levels.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-member.php' );
-	include( RCP_PLUGIN_DIR . 'includes/class-rcp-payment.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-payments.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-discounts.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-registration.php' );

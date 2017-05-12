@@ -179,7 +179,7 @@ class RCP_Payment_Gateway {
 	 * create with the status 'pending' and will need to be updated after
 	 * a successful payment.
 	 *
-	 * @var RCP_Payment
+	 * @var object
 	 * @access public
 	 * @since  2.9
 	 */
@@ -200,6 +200,11 @@ class RCP_Payment_Gateway {
 
 		if( ! empty( $subscription_data ) ) {
 
+			/**
+			 * @var RCP_Payments $rcp_payments_db
+			 */
+			global $rcp_payments_db;
+
 			$this->email               = $subscription_data['user_email'];
 			$this->user_id             = $subscription_data['user_id'];
 			$this->user_name           = $subscription_data['user_name'];
@@ -217,7 +222,7 @@ class RCP_Payment_Gateway {
 			$this->auto_renew          = $this->supports( 'recurring' ) ? $subscription_data['auto_renew'] : false;;
 			$this->return_url          = $subscription_data['return_url'];
 			$this->subscription_data   = $subscription_data;
-			$this->payment             = new RCP_Payment( $subscription_data['payment_id'] );
+			$this->payment             = $rcp_payments_db->get_payment( $subscription_data['payment_id'] );
 
 		}
 

@@ -549,8 +549,7 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 							if ( ! empty( $pending_payment_id ) ) {
 
 								// Completing a pending payment. Account activation is handled in rcp_complete_registration()
-								$payment = new RCP_Payment( absint( $pending_payment_id ) );
-								$payment->update( $payment_data );
+								$rcp_payments->update( $pending_payment_id, $payment_data );
 
 							} else {
 

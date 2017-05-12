@@ -845,12 +845,17 @@ class RCP_Member extends WP_User {
 	 */
 	public function get_pending_subscription_id() {
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		$pending_level_id = get_user_meta( $this->ID, 'rcp_pending_subscription_level', true );
 		$pending_payment  = get_user_meta( $this->ID, 'rcp_pending_payment_id', true );
 
 		if ( ! empty( $pending_payment ) ) {
-			$payment          = new RCP_Payment( $pending_payment );
-			$pending_level_id = $payment->subscription;
+			$payment          = $rcp_payments_db->get_payment( absint( $pending_payment ) );
+			$pending_level_id = $payment->subscription_level_id;
 		}
 
 		return $pending_level_id;
@@ -904,11 +909,16 @@ class RCP_Member extends WP_User {
 	 */
 	public function get_pending_subscription_key() {
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		$pending_key      = get_user_meta( $this->ID, 'rcp_pending_subscription_key', true );
 		$pending_payment  = get_user_meta( $this->ID, 'rcp_pending_payment_id', true );
 
 		if ( ! empty( $pending_payment ) ) {
-			$payment     = new RCP_Payment( $pending_payment );
+			$payment     = $rcp_payments_db->get_payment( absint( $pending_payment ) );
 			$pending_key = $payment->subscription_key;
 		}
 

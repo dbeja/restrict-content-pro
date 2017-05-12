@@ -8,8 +8,13 @@
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
  */
 
+/**
+ * @var RCP_Payments $rcp_payments_db
+ */
+global $rcp_payments_db;
+
 $payment_id   = ! empty( $_GET['payment_id'] ) ? absint( $_GET['payment_id'] ) : 0;
-$payment      = new RCP_Payment( $payment_id );
+$payment      = $rcp_payments_db->get_payment( $payment_id );
 $user         = get_userdata( $payment->user_id );
 $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 ?>
@@ -60,7 +65,7 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 				<label for="rcp-discount-code"><?php _e( 'Discount Code', 'rcp' ); ?></label>
 			</th>
 			<td>
-				<?php echo $payment->discount_code ? esc_html( $payment->discount_code ) : __( 'None', 'rcp' ); ?>
+				<?php echo ! empty( $payment->discount_code ) ? esc_html( $payment->discount_code ) : __( 'None', 'rcp' ); ?>
 				<p class="description"><?php _e( 'Discount code used when making this payment', 'rcp' ); ?></p>
 			</td>
 		</tr>
@@ -78,7 +83,7 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 				<label for="rcp-gateway"><?php _e( 'Gateway', 'rcp' ); ?></label>
 			</th>
 			<td>
-				<?php echo $payment->gateway ? ucwords( $payment->gateway ) : __( 'Unknown', 'rcp' ); ?>
+				<?php echo ! empty( $payment->gateway ) ? ucwords( $payment->gateway ) : __( 'Unknown', 'rcp' ); ?>
 				<p class="description"><?php _e( 'Gateway used to make the payment', 'rcp' ); ?></p>
 			</td>
 		</tr>
