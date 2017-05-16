@@ -123,6 +123,8 @@ class RCP_Payments {
 			// Remove trialing status, if it exists
 			delete_user_meta( $args['user_id'], 'rcp_is_trialing' );
 
+			$payment = $this->get_payment( $payment_id );
+
 			/**
 			 * Triggers when the payment's status is changed. This is here to spoof a status
 			 * change when a payment is first inserted.
@@ -135,8 +137,8 @@ class RCP_Payments {
 			 *
 			 * @since 2.9
 			 */
-			do_action( 'rcp_update_payment_status', $args['status'], $payment_id, $args );
-			do_action( 'rcp_update_payment_status_' . $args['status'], $payment_id, $args );
+			do_action( 'rcp_update_payment_status', $args['status'], $payment_id, $payment );
+			do_action( 'rcp_update_payment_status_' . $args['status'], $payment_id, $payment );
 
 			if ( 'complete' == $args['status'] ) {
 				/**
