@@ -213,6 +213,8 @@ class RCP_Payments {
 
 		if ( $updated && array_key_exists( 'status', $payment_data ) ) {
 
+			$payment = $this->get_payment( $payment_id );
+
 			/**
 			 * Triggers when the payment's status is changed.
 			 *
@@ -222,11 +224,10 @@ class RCP_Payments {
 			 *
 			 * @since 2.9
 			 */
-			do_action( 'rcp_update_payment_status', $payment_data['status'], $payment_id, $payment_data );
-			do_action( 'rcp_update_payment_status_' . $payment_data['status'], $payment_id, $payment_data );
+			do_action( 'rcp_update_payment_status', $payment_data['status'], $payment_id, $payment );
+			do_action( 'rcp_update_payment_status_' . $payment_data['status'], $payment_id, $payment );
 
 			if ( 'complete' == $payment_data['status'] ) {
-				$payment = $this->get_payment( $payment_id );
 				$amount  = ! empty( $payment->amount ) ? $payment->amount : 0.00;
 
 				/**

@@ -337,15 +337,14 @@ add_action( 'rcp_set_status', 'rcp_email_on_cancellation', 11, 2 );
 /**
  * Triggers an email to the member when a payment is received.
  *
- * @param string      $old_status Old payment status from before the update.
- * @param int         $payment_id ID of the payment being completed.
- * @param RCP_Payment $payment    Payment object.
+ * @param int    $payment_id ID of the payment being completed.
+ * @param object $payment    Payment object from the database.
  *
  * @access  public
  * @since   2.3
  * @return  void
  */
-function rcp_email_payment_received( $old_status, $payment_id, $payment ) {
+function rcp_email_payment_received( $payment_id, $payment ) {
 
 	global $rcp_options;
 
@@ -375,7 +374,7 @@ function rcp_email_payment_received( $old_status, $payment_id, $payment ) {
 	$emails->send( $user_info->user_email, $rcp_options['payment_received_subject'], $message );
 
 }
-add_action( 'rcp_update_payment_status_complete', 'rcp_email_payment_received', 10, 3 );
+add_action( 'rcp_update_payment_status_complete', 'rcp_email_payment_received', 10, 2 );
 
 /**
  * Emails a member when a renewal payment fails.

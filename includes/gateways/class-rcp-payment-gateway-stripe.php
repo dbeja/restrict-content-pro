@@ -60,6 +60,11 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 		global $rcp_options;
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		\Stripe\Stripe::setApiKey( $this->secret_key );
 
 		if ( method_exists( '\Stripe\Stripe', 'setAppInfo' ) ) {
@@ -292,7 +297,7 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 				), $this ) );
 
 				// Complete pending payment. This also updates the expiration date, status, etc.
-				$this->payment->update( array(
+				$rcp_payments_db->update( $this->payment->id, array(
 					'transaction_id' => $charge->id,
 					'status'         => 'complete'
 				) );
