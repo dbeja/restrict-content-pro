@@ -69,6 +69,11 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 		Twocheckout::sellerId( $this->seller_id );
 		Twocheckout::sandbox( $this->test_mode );
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		$member = new RCP_Member( $this->user_id );
 
 		if( empty( $_POST['twoCheckoutToken'] ) ) {
@@ -132,7 +137,7 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 					$cancelled = $member->cancel_payment_profile( false );
 				}
 
-				$this->payment->update( array(
+				$rcp_payments_db->update( $this->payment->id, array(
 					'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 					'payment_type'     => $payment_type,
 					'transaction_id'   => $charge['response']['orderNumber'],

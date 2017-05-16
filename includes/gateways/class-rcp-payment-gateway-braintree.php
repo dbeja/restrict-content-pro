@@ -90,7 +90,10 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 			);
 		}
 
-		global $rcp_options;
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
 
 		$paid     = false;
 		$txn_args = array();
@@ -204,7 +207,7 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 
 					if ( $single_payment->success ) {
 
-						$this->payment->update( array(
+						$rcp_payments_db->update( $this->payment->id, array(
 							'date'           => date( 'Y-m-d g:i:s', time() ),
 							'transaction_id' => $single_payment->transaction->id,
 						    'status'         => 'complete'
@@ -350,7 +353,7 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 			}
 
 			// Log the one-time payment
-			$this->payment->update( array(
+			$rcp_payments_db->update( $this->payment->id, array(
 				'date'           => date( 'Y-m-d g:i:s', time() ),
 				'payment_type'   => __( 'Braintree Credit Card One Time', 'rcp' ),
 				'transaction_id' => $result->transaction->id,

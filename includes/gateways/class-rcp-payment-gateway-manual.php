@@ -34,6 +34,11 @@ class RCP_Payment_Gateway_Manual extends RCP_Payment_Gateway {
 	 */
 	public function process_signup() {
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		$member = new RCP_Member( $this->user_id );
 
 		$old_level = get_user_meta( $member->ID, '_rcp_old_subscription_id', true );
@@ -47,7 +52,7 @@ class RCP_Payment_Gateway_Manual extends RCP_Payment_Gateway {
 		$member->renew( false, 'pending', $expiration );
 
 		// Update payment record with transaction ID.
-		$this->payment->update( array(
+		$rcp_payments_db->update( $this->payment->id, array(
 			'payment_type'   => 'manual',
 			'transaction_id' => $this->generate_transaction_id()
 		) );
