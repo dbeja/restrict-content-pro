@@ -658,7 +658,7 @@ function rcp_print_user_payments( $user_id ) {
 function rcp_print_user_payments_formatted( $user_id ) {
 
 	$payments = new RCP_Payments;
-	$user_payments = $payments->get_payments( array( 'user_id' => $user_id ) );
+	$user_payments = $payments->get_payments( array( 'user_id' => $user_id, 'status' => 'complete' ) );
 	$payments_list = '';
 
 	if ( ! $user_payments ) {

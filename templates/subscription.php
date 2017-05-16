@@ -75,7 +75,9 @@ if( isset( $_GET['profile'] ) && 'cancelled' == $_GET['profile'] ) : ?>
 		</tr>
 	</thead>
 	<tbody>
-	<?php if( $payments = rcp_get_user_payments( get_current_user_id(), array( 'status' => 'complete' ) ) ) : ?>
+	<?php
+	$payments = rcp_get_user_payments( get_current_user_id(), array( 'status' => 'complete' ) );
+	if( $payments ) : ?>
 		<?php foreach( $payments as $payment ) : ?>
 			<tr>
 				<td data-th="<?php esc_attr_e( 'Invoice #', 'rcp' ); ?>"><?php echo $payment->id; ?></td>
