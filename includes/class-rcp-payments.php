@@ -579,7 +579,9 @@ class RCP_Payments {
 				continue;
 			}
 
-			if ( empty( $subscription = rcp_get_subscription_details_by_name( $payment->subscription ) ) ) {
+			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
+
+			if ( empty( $subscription ) ) {
 				continue;
 			}
 
