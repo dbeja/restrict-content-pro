@@ -192,8 +192,6 @@ add_action( 'rcp_check_member_counts', 'rcp_check_member_counts' );
 /**
  * Find pending payments that are more than a week old and mark them as abandoned.
  *
- * @todo Make this query actually work.
- *
  * @since 2.9
  * @return void
  */
@@ -206,7 +204,7 @@ function rcp_mark_abandoned_payments() {
 
 	$args = array(
 		'fields' => 'id',
-		'number' => -1,
+		'number' => 9999,
 	    'status' => 'pending',
 	    'date'   => array(
 	    	'end' => date( 'Y-m-d', strtotime( '-7 days', current_time( 'timestamp' ) ) )
@@ -222,4 +220,4 @@ function rcp_mark_abandoned_payments() {
 	}
 
 }
-//add_action( 'rcp_mark_abandoned_payments', 'rcp_mark_abandoned_payments' );
+add_action( 'rcp_mark_abandoned_payments', 'rcp_mark_abandoned_payments' );

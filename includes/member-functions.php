@@ -713,19 +713,24 @@ function rcp_print_user_payments_formatted( $user_id ) {
 /**
  * Retrieve the payments for a specific user
  *
- * @param int $user_id The ID of the user to get payments for
+ * @param int   $user_id The ID of the user to get payments for
+ * @param array $args    Override the default query args.
  *
  * @since  1.5
  * @return array
 */
-function rcp_get_user_payments( $user_id = 0 ) {
+function rcp_get_user_payments( $user_id = 0, $args = array() ) {
 
 	if( empty( $user_id ) ) {
 		$user_id = get_current_user_id();
 	}
 
+	$args = wp_parse_args( $args, array(
+		'user_id' => $user_id
+	) );
+
 	$payments = new RCP_Payments;
-	return $payments->get_payments( array( 'user_id' => $user_id ) );
+	return $payments->get_payments( $args );
 }
 
 /**
