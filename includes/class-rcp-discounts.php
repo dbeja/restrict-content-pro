@@ -365,7 +365,7 @@ class RCP_Discounts {
 	 *
 	 * @access  public
 	 * @since   1.5
-	 * @return  int|false ID of the newly created discount code or false on failure.
+	 * @return  int|WP_Error|false ID of the newly created discount code or WP_Error/false on failure.
 	 */
 	public function insert( $args = array() ) {
 

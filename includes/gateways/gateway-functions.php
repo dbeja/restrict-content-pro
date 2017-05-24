@@ -368,3 +368,79 @@ function rcp_get_merchant_transaction_id_link( $payment ) {
 	return apply_filters( 'rcp_merchant_transaction_id_link', $link, $payment );
 
 }
+
+/**
+ * Returns the name of the gateway, given the class object
+ *
+ * @param RCP_Payment_Gateway $gateway Gateway object.
+ *
+ * @since 2.9
+ * @return string
+ */
+function rcp_get_gateway_name_from_object( $gateway ) {
+
+	$gateway_classes = wp_list_pluck( rcp_get_payment_gateways(), 'class' );
+	$gateway_name    = array_search( get_class( $gateway ), $gateway_classes );
+
+	return ucwords( $gateway_name );
+
+}
+
+/**
+ * Log cancellation via webhook
+ *
+ * @param RCP_Member          $member  Member object.
+ * @param RCP_Payment_Gateway $gateway Gateway object.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log_webhook_cancel( $member, $gateway ) {
+	rcp_log( sprintf( 'Membership cancelled via %s webhook for member ID #%d.', rcp_get_gateway_name_from_object( $gateway ), $member->ID ) );
+}
+add_action( 'rcp_webhook_cancel', 'rcp_log_webhook_cancel', 10, 2 );
+
+/**
+ * Log new recurring payment profile created via webhook. This is when the
+ * subscription is initially created, it does not include renewals.
+ *
+ * @param RCP_Member          $member  Member object.
+ * @param RCP_Payment_Gateway $gateway Gateway object.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log_webhook_recurring_payment_profile_created( $member, $gateway ) {
+	rcp_log( sprintf( 'New recurring payment profile created for member #%d in gateway %s.', $member->ID, rcp_get_gateway_name_from_object( $gateway ) ) );
+}
+add_action( 'rcp_webhook_recurring_payment_profile_created', 'rcp_log_webhook_recurring_payment_profile_created', 10, 2 );
+
+/**
+ * Log error when duplicate payment is detected.
+ *
+ * @param string              $payment_txn_id Payment transaction ID.
+ * @param RCP_Member          $member         Member object.
+ * @param RCP_Payment_Gateway $gateway        Gateway object.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log_duplicate_ipn_payment( $payment_txn_id, $member, $gateway ) {
+	rcp_log( sprintf( 'A duplicate payment was detected for user #%d. Check to make sure both payments weren\'t recorded. Transaction ID: %s', $member->ID, $payment_txn_id ) );
+}
+add_action( 'rcp_ipn_duplicate_payment', 'rcp_log_duplicate_ipn_payment', 10, 3 );
+
+/**
+ * Log payment inserted via gateway. This can run on renewals and/or one-time payments.
+ *
+ * @param RCP_Member          $member     Member object.
+ * @param int                 $payment_id ID of the payment that was just inserted.
+ * @param RCP_Payment_Gateway $gateway    Gateway object.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log_gateway_payment_processed( $member, $payment_id, $gateway ) {
+	rcp_log( sprintf( 'Payment #%d completed for member #%d via %s gateway.', $payment_id, $member->ID, rcp_get_gateway_name_from_object( $gateway ) ) );
+}
+add_action( 'rcp_gateway_payment_processed', 'rcp_log_gateway_payment_processed', 10, 3 );

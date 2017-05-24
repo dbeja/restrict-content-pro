@@ -155,8 +155,12 @@ class RCP_Payments {
 				do_action( 'rcp_insert_payment', $payment_id, $args, $args['amount'] );
 			}
 
+			rcp_log( sprintf( 'New payment inserted. ID: %d; User ID: %d; Amount: %.2f; Subscription: %s; Status: %s', $payment_id, $args['user_id'], $args['amount'], $args['subscription'], $args['status'] ) );
+
 			return $payment_id;
 
+		} else {
+			rcp_log( 'Failed inserting new payment into database.' );
 		}
 
 		return false;
@@ -202,7 +206,10 @@ class RCP_Payments {
 	public function update( $payment_id = 0, $payment_data = array() ) {
 
 		global $wpdb;
+
 		do_action( 'rcp_update_payment', $payment_id, $payment_data );
+
+		rcp_log( sprintf( 'Updating payment #%d with new data: %s', $payment_id, var_export( $payment_data, true ) ) );
 
 		if ( array_key_exists( 'status', $payment_data ) ) {
 			delete_transient( md5( 'rcp_payments_count_' . serialize( array( 'user_id' => 0, 'status' => '', 's' => '' ) ) ) );
@@ -262,8 +269,13 @@ class RCP_Payments {
 	 * @return  void
 	*/
 	public function delete( $payment_id = 0 ) {
+
 		global $wpdb;
+
 		do_action( 'rcp_delete_payment', $payment_id );
+
+		rcp_log( sprintf( 'Deleted payment #%d.', $payment_id ) );
+
 		$remove = $wpdb->query( $wpdb->prepare( "DELETE FROM {$this->db_name} WHERE `id` = '%d';", absint( $payment_id ) ) );
 
 	}

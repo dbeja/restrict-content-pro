@@ -25,6 +25,8 @@ class RCP_Member extends WP_User {
 		// double check that the status and expiration match. Update if needed
 		if( $status == 'active' && $this->is_expired() ) {
 
+			rcp_log( sprintf( 'Expiring member %d via get_status() method. Expiration Date: %s; Subscription Level: %s', $this->ID, $this->get_expiration_date(), $this->get_subscription_name() ) );
+
 			$status = 'expired';
 			$this->set_status( $status );
 
@@ -69,10 +71,12 @@ class RCP_Member extends WP_User {
 
 			// Record the status change
 			if( $old_status && ( $old_status != $new_status ) ) {
+				rcp_log( sprintf( 'Member #%d status changed from %s to %s.', $this->ID, $old_status, $new_status ) );
 				$this->add_note( sprintf( __( 'Member\'s status changed from %s to %s', 'rcp' ), $old_status, $new_status ) );
 			}
 
 			if ( ! $old_status ) {
+				rcp_log( sprintf( 'Member #%d status set to %s.', $this->ID, $new_status ) );
 				$this->add_note( sprintf( __( 'Member\'s status set to %s', 'rcp' ), $new_status ) );
 			}
 
@@ -115,7 +119,7 @@ class RCP_Member extends WP_User {
 			$expiration = date_i18n( get_option( 'date_format' ), strtotime( $expiration, current_time( 'timestamp' ) ) );
 		}
 
-		return apply_filters( 'rcp_member_get_expiration_date', $expiration, $this->ID, $this );
+		return apply_filters( 'rcp_member_get_expiration_date', $expiration, $this->ID, $this, $formatted, $pending );
 
 	}
 
@@ -395,6 +399,8 @@ class RCP_Member extends WP_User {
 	 */
 	public function renew( $recurring = false, $status = 'active', $expiration = '' ) {
 
+		rcp_log( sprintf( 'Starting membership renewal for user #%d. Subscription ID: %d; Current Expiration Date: %s; Current Status: %s', $this->ID, $this->get_subscription_id(), $this->get_expiration_date(), $this->get_status() ) );
+
 		$subscription_id = $this->get_pending_subscription_id();
 
 		if( empty( $subscription_id ) ) {
@@ -424,6 +430,8 @@ class RCP_Member extends WP_User {
 		delete_user_meta( $this->ID, '_rcp_expired_email_sent' );
 
 		do_action( 'rcp_member_post_renew', $this->ID, $expiration, $this );
+
+		rcp_log( sprintf( 'Completed membership renewal for user #%d. Subscription ID: %d; New Expiration Date: %s; New Status: %s', $this->ID, $subscription_id, $expiration, $this->get_status() ) );
 
 	}
 
@@ -508,6 +516,8 @@ class RCP_Member extends WP_User {
 		$success = false;
 
 		if( ! $this->can_cancel() ) {
+			rcp_log( sprintf( 'Unable to cancel payment profile for member #%d.', $this->ID ) );
+
 			return $success;
 		}
 
@@ -716,6 +726,12 @@ class RCP_Member extends WP_User {
 
 		if( $success && $set_status ) {
 			$this->cancel();
+		}
+
+		if( $success ) {
+			rcp_log( sprintf( 'Payment profile successfully cancelled for member #%d.', $this->ID ) );
+		} else {
+			rcp_log( sprintf( 'Failed cancelling payment profile for member #%d.', $this->ID ) );
 		}
 
 		return $success;
@@ -1082,6 +1098,8 @@ class RCP_Member extends WP_User {
 	 */
 	public function set_recurring( $yes = true ) {
 
+		rcp_log( sprintf( 'Updating recurring status for member #%d. Previous: %s; New: %s', $this->ID, var_export( $this->is_recurring(), true ), var_export( $yes, true ) ) );
+
 		if( $yes ) {
 			update_user_meta( $this->ID, 'rcp_recurring', 'yes' );
 		} else {
@@ -1188,6 +1206,8 @@ class RCP_Member extends WP_User {
 		update_user_meta( $this->ID, 'rcp_email_verified', true );
 
 		do_action( 'rcp_member_post_verify_email', $this->ID, $this );
+
+		rcp_log( sprintf( 'Email successfully verified for user #%d.', $this->ID ) );
 
 	}
 

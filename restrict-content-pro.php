@@ -251,6 +251,7 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-emails.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-integrations.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-levels.php' );
+	include( RCP_PLUGIN_DIR . 'includes/class-rcp-logging.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-member.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-payments.php' );
 	include( RCP_PLUGIN_DIR . 'includes/class-rcp-discounts.php' );
@@ -284,8 +285,9 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 	include( RCP_PLUGIN_DIR . 'includes/shortcodes.php' );
 	include( RCP_PLUGIN_DIR . 'includes/template-functions.php' );
 
-	if( !class_exists( 'WP_Logging' ) ) {
-		include( RCP_PLUGIN_DIR . 'includes/libraries/class-wp-logging.php' );
+	// @todo remove
+	if( ! class_exists( 'WP_Logging' ) ) {
+		include( RCP_PLUGIN_DIR . 'includes/deprecated/class-wp-logging.php' );
 	}
 
 	// admin only includes
@@ -293,26 +295,29 @@ if( version_compare( PHP_VERSION, '5.3', '<' ) ) {
 
 		include( RCP_PLUGIN_DIR . 'includes/admin/upgrades.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/class-rcp-upgrades.php' );
+		include( RCP_PLUGIN_DIR . 'includes/admin/admin-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/admin-pages.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/admin-notices.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/admin-ajax-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/class-rcp-add-on-updater.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/screen-options.php' );
+		include( RCP_PLUGIN_DIR . 'includes/admin/members/member-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/members/members-page.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/settings/settings.php' );
+		include( RCP_PLUGIN_DIR . 'includes/admin/subscriptions/subscription-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/subscriptions/subscription-levels.php' );
+		include( RCP_PLUGIN_DIR . 'includes/admin/discounts/discount-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/discounts/discount-codes.php' );
+		include( RCP_PLUGIN_DIR . 'includes/admin/payments/payment-actions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/payments/payments-page.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/reports/reports-page.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/export.php' );
-		include( RCP_PLUGIN_DIR . 'includes/admin/logs.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/tools/tools-page.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/help/help-menus.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/metabox.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/add-ons.php' );
 		include( RCP_PLUGIN_DIR . 'includes/admin/terms.php' );
 		include( RCP_PLUGIN_DIR . 'includes/user-page-columns.php' );
-		include( RCP_PLUGIN_DIR . 'includes/process-data.php' );
 		include( RCP_PLUGIN_DIR . 'includes/export-functions.php' );
 		include( RCP_PLUGIN_DIR . 'includes/deactivation.php' );
 		include( RCP_PLUGIN_DIR . 'RCP_Plugin_Updater.php' );

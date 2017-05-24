@@ -3,6 +3,8 @@
 /**
  * Class for logging events and errors
  *
+ * @deprecated 2.9 In favor of new RCP_Logging class.
+ *
  * @package     WP Logging Class
  * @copyright   Copyright (c) 2012, Pippin Williamson
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License

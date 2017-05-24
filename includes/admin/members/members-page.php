@@ -144,6 +144,7 @@ function rcp_members_page() {
 						<span alt="f223" class="rcp-help-tip dashicons dashicons-editor-help" title="<?php esc_attr_e( 'If not enabled, the member(s) will retain access until the end of their current term. If checked, access will be revoked immediately.', 'rcp' ); ?>"></span>
 					</span>
 					<input type="text" class="rcp-datepicker" name="expiration" placeholder="<?php esc_attr_e( 'New Expiration Date', 'rcp' ); ?>" id="rcp-bulk-expiration" value=""/>
+					<input type="hidden" name="rcp-action" value="bulk_edit_members">
 					<input type="submit" id="rcp-submit-bulk-action" class="button action" value="<?php _e( 'Apply', 'rcp' ); ?>"/>
 				</div>
 				<?php wp_nonce_field( 'rcp_bulk_edit_nonce', 'rcp_bulk_edit_nonce' ); ?>
@@ -211,13 +212,13 @@ function rcp_members_page() {
 												<a href="<?php echo esc_url( add_query_arg( 'user_id', $member->ID, admin_url( 'user-edit.php' ) ) ); ?>" title="<?php _e( 'View User\'s Profile', 'rcp' ); ?>"><?php _e( 'Edit User Account', 'rcp' ); ?></a>
 											</span>
 											<?php if( rcp_can_member_cancel( $member->ID ) ) { ?>
-												<span> | <a href="<?php echo wp_nonce_url( add_query_arg('cancel_member', $member->ID, $current_page ), 'rcp-cancel-nonce' ); ?>" class="trash rcp_cancel"><?php _e('Cancel', 'rcp'); ?></a></span>
+												<span> | <a href="<?php echo wp_nonce_url( add_query_arg( array( 'rcp-action' => 'cancel_member', 'member_id' => $member->ID ), $current_page ), 'rcp-cancel-nonce' ); ?>" class="trash rcp_cancel"><?php _e('Cancel', 'rcp'); ?></a></span>
 											<?php } ?>
 											<?php if( $switch_to_url = rcp_get_switch_to_url( $member->ID ) ) { ?>
 												<span> | <a href="<?php echo esc_url( $switch_to_url ); ?>" class="rcp_switch"><?php _e('Switch to User', 'rcp'); ?></a></span>
 											<?php } ?>
 											<?php if( $rcp_member->is_pending_verification() ) : ?>
-												<span> | <a href="<?php echo wp_nonce_url( add_query_arg( 'send_verification', $member->ID, $current_page ), 'rcp-verification-nonce' ); ?>" class="rcp_send_verification"><?php _e( 'Re-send Verification', 'rcp' ); ?></a></span>
+												<span> | <a href="<?php echo wp_nonce_url( add_query_arg( array( 'rcp-action' => 'send_verification', 'member_id' => $member->ID ), $current_page ), 'rcp-verification-nonce' ); ?>" class="rcp_send_verification"><?php _e( 'Re-send Verification', 'rcp' ); ?></a></span>
 											<?php endif; ?>
 											<span class="rcp-separator"> | </span>
 											<span class="id rcp-member-id"><?php echo __( 'ID:', 'rcp' ) . ' ' . $member->ID; ?></span>

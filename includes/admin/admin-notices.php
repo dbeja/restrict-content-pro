@@ -170,6 +170,21 @@ function rcp_admin_notices() {
 				$text = __( 'Subscription level fields are required', 'rcp' );
 				$class = 'error';
 				break;
+
+			case 'level_deleted' :
+
+				$text = __( 'Subscription level deleted', 'rcp' );
+				break;
+
+			case 'level_activated' :
+
+				$text = __( 'Subscription level activated', 'rcp' );
+				break;
+
+			case 'level_deactivated' :
+
+				$text = __( 'Subscription level deactivated', 'rcp' );
+				break;
 		}
 	}
 
@@ -185,6 +200,21 @@ function rcp_admin_notices() {
 
 				$text = __( 'The discount code could not be created due to an error', 'rcp' );
 				$class = 'error';
+				break;
+
+			case 'discount_deleted' :
+
+				$text = __( 'Discount code successfully deleted', 'rcp' );
+				break;
+
+			case 'discount_activated' :
+
+				$text = __( 'Discount code activated', 'rcp' );
+				break;
+
+			case 'discount_deactivated' :
+
+				$text = __( 'Discount code deactivated', 'rcp' );
 				break;
 		}
 	}

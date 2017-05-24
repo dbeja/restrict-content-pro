@@ -213,3 +213,20 @@ function rcp_paypal_update_billing_card( $member_id = 0, $member_obj ) {
 
 }
 add_action( 'rcp_update_billing_card', 'rcp_paypal_update_billing_card', 10, 2 );
+
+/**
+ * Log the start of a valid IPN request
+ *
+ * @param array $payment_data Payment information to be stored in the DB.
+ * @param int   $user_id      ID of the user the payment is for.
+ * @param array $posted       Data sent via the IPN.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log_valid_paypal_ipn( $payment_data, $user_id, $posted ) {
+
+	rcp_log( sprintf( 'Started processing valid PayPal IPN request for user #%d. Payment Data: %s', $user_id, var_export( $payment_data, true ) ) );
+
+}
+add_action( 'rcp_valid_ipn', 'rcp_log_valid_paypal_ipn', 10, 3 );

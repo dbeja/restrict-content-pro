@@ -160,6 +160,8 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 
 			} else {
 
+				$this->error_message = $response->getErrorMessage();
+
 				do_action( 'rcp_registration_failed', $this );
 
 				wp_die( $response->getErrorMessage(), __( 'Error', 'rcp' ), array( 'response' => '401' ) );
@@ -167,6 +169,7 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 			}
 
 		} catch ( AuthorizeNetException $e ) {
+			$this->error_message = $e->getMessage();
 			do_action( 'rcp_registration_failed', $this );
 			wp_die( $e->getMessage(), __( 'Error', 'rcp' ), array( 'response' => '401' ) );
 		}
@@ -224,21 +227,32 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 					'transaction_id'   => $transaction_id
 				);
 
-				if ( intval( $_POST['x_subscription_paynum'] ) > 1 ) {
-					$member->renew( $member->is_recurring() );
-				}
-
 				$pending_payment_id = $member->get_pending_payment_id();
 				if ( ! empty( $pending_payment_id ) ) {
 					// Completing a pending payment (this will be the first payment made via registration).
 					$rcp_payments_db->update( absint( $pending_payment_id ), $payment_data );
+					$payment_id = $pending_payment_id;
 				} else {
-					$payments->insert( $payment_data );
+					$payment_id = $payments->insert( $payment_data );
+				}
+
+				if ( intval( $_POST['x_subscription_paynum'] ) > 1 ) {
+
+					// Renewal payment.
+					$member->renew( $member->is_recurring() );
+					do_action( 'rcp_webhook_recurring_payment_processed', $member, $payment_id, $this );
+
+				} elseif ( $member->is_recurring() ) {
+
+					// Recurring profile first created.
+					do_action( 'rcp_webhook_recurring_payment_profile_created', $member, $this );
+
 				}
 
 				$member->add_note( __( 'Subscription processed in Authorize.net', 'rcp' ) );
 
 				do_action( 'rcp_authorizenet_silent_post_payment', $member, $this );
+				do_action( 'rcp_gateway_payment_processed', $member, $payment_id, $this );
 
 			} elseif ( 2 == $response_code ) {
 

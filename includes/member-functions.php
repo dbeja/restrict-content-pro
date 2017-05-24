@@ -1519,6 +1519,8 @@ function rcp_add_recurring_payment_failure_note( $member, $gateway ) {
 
 	$member->add_note( $note );
 
+	rcp_log( sprintf( 'Recurring payment failed for user #%d. Gateway: %s; Subscription Level: %s; Expiration Date: %s', $member->ID, ucwords( $gateway_name ), $member->get_subscription_name(), $member->get_expiration_date() ) );
+
 }
 add_action( 'rcp_recurring_payment_failed', 'rcp_add_recurring_payment_failure_note', 10, 2 );
 

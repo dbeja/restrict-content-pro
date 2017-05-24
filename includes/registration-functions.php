@@ -52,6 +52,8 @@ function rcp_process_registration() {
 		$gateway = sanitize_text_field( $_POST['rcp_gateway'] );
 	}
 
+	rcp_log( sprintf( 'Started new registration for subscription #%d via %s.', $subscription_id, $gateway ) );
+
 	/***********************
 	* validate the form
 	***********************/
@@ -104,6 +106,8 @@ function rcp_process_registration() {
 	$errors = rcp_errors()->get_error_messages();
 
 	if ( ! empty( $errors ) && $is_ajax ) {
+		rcp_log( sprintf( 'Registration cancelled with the following errors: %s.', implode( ', ', $errors ) ) );
+
 		wp_send_json_error( array(
 			'success'          => false,
 			'errors'           => rcp_get_error_messages_html( 'register' ),
@@ -232,6 +236,7 @@ function rcp_process_registration() {
 			}
 
 			rcp_add_subscription_to_user( $user_data['id'], $member_data );
+			rcp_log( sprintf( 'Completed registration to level #%d with full discount for user #%d.', $subscription_id, $user_data['id'] ) );
 			rcp_login_user_in( $user_data['id'], $user_data['login'] );
 			wp_redirect( rcp_get_return_url( $user_data['id'] ) ); exit;
 
@@ -300,6 +305,8 @@ function rcp_process_registration() {
 			rcp_login_user_in( $user_data['id'], $user_data['login'] );
 
 		}
+
+		rcp_log( sprintf( 'Completed free registration to level #%d for user #%d.', $subscription_id, $user_data['id'] ) );
 
 		// send the newly created user to the redirect page after logging them in
 		wp_redirect( rcp_get_return_url( $user_data['id'] ) ); exit;
@@ -871,6 +878,8 @@ function rcp_add_prorate_fee( $registration ) {
 	}
 
 	$registration->add_fee( -1 * $amount, __( 'Proration Credit', 'rcp' ), false, true );
+
+	rcp_log( sprintf( 'Adding %.2f proration credits to registration for user #%d.', $amount, get_current_user_id() ) );
 }
 add_action( 'rcp_registration_init', 'rcp_add_prorate_fee' );
 
@@ -977,6 +986,9 @@ function rcp_remove_subscription_data_on_failure( $gateway ) {
 		) );
 	}
 
+	// Log error.
+	rcp_log( sprintf( '%s registration failed for user #%d. Error message: %s', rcp_get_gateway_name_from_object( $gateway ), $gateway->user_id, $gateway->error_message ) );
+
 }
 add_action( 'rcp_registration_failed', 'rcp_remove_subscription_data_on_failure' );
 
@@ -1005,6 +1017,8 @@ function rcp_complete_registration( $payment_id, $payment ) {
 	if ( empty( $pending_payment_id ) || $pending_payment_id != $payment_id ) {
 		return;
 	}
+
+	rcp_log( sprintf( 'Completing registration for member #%d via payment #%d.', $member->ID, $pending_payment_id ) );
 
 	$subscription_id = $payment->subscription_level_id;
 	$subscription    = rcp_get_subscription_details( $subscription_id );

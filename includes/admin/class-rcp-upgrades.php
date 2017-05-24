@@ -41,6 +41,7 @@ class RCP_Upgrades {
 
 		// If upgrades have occurred or the DB version is differnt from the version constant
 		if ( $this->upgraded || $this->version <> RCP_PLUGIN_VERSION ) {
+			rcp_log( sprintf( 'RCP upgraded from version %s to %s.', $this->version, RCP_PLUGIN_VERSION ), true );
 			update_option( 'rcp_version_upgraded_from', $this->version );
 			update_option( 'rcp_version', RCP_PLUGIN_VERSION );
 		}
@@ -56,6 +57,7 @@ class RCP_Upgrades {
 	private function v26_upgrades() {
 
 		if( version_compare( $this->version, '2.6', '<' ) ) {
+			rcp_log( 'Performing version 2.6 upgrades: options install.', true );
 			@rcp_options_install();
 		}
 	}
@@ -69,6 +71,8 @@ class RCP_Upgrades {
 	private function v27_upgrades() {
 
 		if( version_compare( $this->version, '2.7', '<' ) ) {
+
+			rcp_log( 'Performing version 2.7 upgrades: options install and updating discounts database.', true );
 
 			global $wpdb, $rcp_discounts_db_name;
 

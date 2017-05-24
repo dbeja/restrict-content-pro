@@ -131,6 +131,7 @@ class RCP_Payment_Gateway_PayPal_Pro extends RCP_Payment_Gateway {
 
 		if( is_wp_error( $request ) ) {
 
+			$this->error_message = $request->get_error_message();
 			do_action( 'rcp_registration_failed', $this );
 			do_action( 'rcp_paypal_pro_signup_payment_failed', $request, $this );
 
@@ -147,6 +148,7 @@ class RCP_Payment_Gateway_PayPal_Pro extends RCP_Payment_Gateway {
 
 			if( false !== strpos( strtolower( $body['ACK'] ), 'failure' ) ) {
 
+				$this->error_message = $body['L_LONGMESSAGE0'];
 				do_action( 'rcp_registration_failed', $this );
 				do_action( 'rcp_paypal_pro_signup_payment_failed', $request, $this );
 

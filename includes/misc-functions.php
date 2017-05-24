@@ -304,28 +304,6 @@ function rcp_get_current_url() {
 
 
 /**
- * Log Types.
- *
- * Sets up the valid log types for WP_Logging.
- *
- * @param array $types Existing log types.
- *
- * @access private
- * @since  1.3.4
- * @return array
- */
-function rcp_log_types( $types ) {
-
-    $types = array(
-    	'gateway_error'
-    );
-    return $types;
-
-}
-add_filter( 'wp_log_types', 'rcp_log_types' );
-
-
-/**
  * Check if "Prevent Account Sharing" is enabled.
  *
  * @access private
@@ -987,3 +965,23 @@ function rcp_delete_transient_post_ids_assigned_to_restricted_terms( $term_id, $
 	delete_transient( 'rcp_post_ids_assigned_to_restricted_terms' );
 }
 add_action( 'edited_term', 'rcp_delete_transient_post_ids_assigned_to_restricted_terms', 10, 3 );
+
+/**
+ * Log a message to the debug file if debug mode is enabled.
+ *
+ * @param string $message Message to log.
+ * @param bool   $force   Whether to force log a message, even if debugging is disabled.
+ *
+ * @since 2.9
+ * @return void
+ */
+function rcp_log( $message = '', $force = false ) {
+	global $rcp_options;
+
+	if ( empty( $rcp_options['debug_mode'] ) && ! $force ) {
+		return;
+	}
+
+	$logs = new RCP_Logging();
+	$logs->log( $message );
+}

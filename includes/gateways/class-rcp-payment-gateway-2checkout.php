@@ -144,11 +144,14 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 				    'status'           => 'complete'
 				) );
 
+				do_action( 'rcp_gateway_payment_processed', $member, $this->payment->id, $this );
+
 				$paid = true;
 			}
 
 		} catch ( Twocheckout_Error $e ) {
 
+			$this->error_message = $e->getMessage();
 			do_action( 'rcp_registration_failed', $this );
 			wp_die( $e->getMessage(), __( 'Error', 'rcp' ), array( 'response' => '401' ) );
 
@@ -252,8 +255,11 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 
 					$recurring = ! empty( $_POST['recurring'] );
 					$member->renew( $recurring );
-					$payments->insert( $payment_data );
+					$payment_id = $payments->insert( $payment_data );
 					$member->add_note( __( 'Subscription renewed in 2Checkout', 'rcp' ) );
+
+					do_action( 'rcp_webhook_recurring_payment_processed', $member, $payment_id, $this );
+					do_action( 'rcp_gateway_payment_processed', $member, $payment_id, $this );
 
 					break;
 
@@ -274,6 +280,8 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 						$member->cancel();
 						$member->add_note( __( 'Subscription cancelled in 2Checkout', 'rcp' ) );
 
+						do_action( 'rcp_webhook_cancel', $member, $this );
+
 					}
 
 
@@ -287,6 +295,8 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 
 					$member->set_status( 'active' );
 					$member->add_note( __( 'Subscription restarted in 2Checkout', 'rcp' ) );
+
+					do_action( 'rcp_webhook_recurring_payment_profile_created', $member, $this );
 
 					break;
 
