@@ -456,6 +456,52 @@ function rcp_filter_restricted_category_content( $content ) {
 // add_filter( 'the_content', 'rcp_filter_restricted_category_content', 101 );
 
 /**
+ * Retrieve the renewal reminder periods
+ *
+ * @deprecated 2.9 Use RCP_Reminders::get_notice_periods() instead.
+ * @see RCP_Reminders::get_notice_periods()
+ *
+ * @since       1.6
+ * @access      public
+ * @return      array
+ */
+function rcp_get_renewal_reminder_periods() {
+	$periods = array(
+		'none'      => __( 'None, reminders disabled', 'rcp' ),
+		'+1 day'    => __( 'One day before expiration', 'rcp' ),
+		'+2 days'   => __( 'Two days before expiration', 'rcp' ),
+		'+3 days'   => __( 'Three days before expiration', 'rcp' ),
+		'+4 days'   => __( 'Four days before expiration', 'rcp' ),
+		'+5 days'   => __( 'Five days before expiration', 'rcp' ),
+		'+6 days'   => __( 'Six days before expiration', 'rcp' ),
+		'+1 week'   => __( 'One week before expiration', 'rcp' ),
+		'+2 weeks'  => __( 'Two weeks before expiration', 'rcp' ),
+		'+3 weeks'  => __( 'Three weeks before expiration', 'rcp' ),
+		'+1 month'  => __( 'One month before expiration', 'rcp' ),
+		'+2 months' => __( 'Two months before expiration', 'rcp' ),
+		'+3 months' => __( 'Three months before expiration', 'rcp' ),
+	);
+	return apply_filters( 'rcp_renewal_reminder_periods', $periods );
+}
+
+
+/**
+ * Retrieve the renewal reminder period that is enabled
+ *
+ * @deprecated 2.9 Multiple periods are now available in new reminders feature.
+ * @see RCP_Reminders
+ *
+ * @since       1.6
+ * @access      public
+ * @return      string
+ */
+function rcp_get_renewal_reminder_period() {
+	global $rcp_options;
+	$period = isset( $rcp_options['renewal_reminder_period'] ) ? $rcp_options['renewal_reminder_period'] : 'none';
+	return apply_filters( 'rcp_get_renewal_reminder_period', $period );
+}
+
+/**
  * Log Types.
  *
  * Sets up the valid log types for WP_Logging.

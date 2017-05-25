@@ -145,6 +145,12 @@ jQuery(document).ready(function($) {
 		}
 		return false;
 	});
+	$('.rcp-delete-reminder').click(function () {
+		if(confirm(rcp_vars.delete_reminder)) {
+			return true;
+		}
+		return false;
+	});
 	$('#rcp-add-new-member').submit(function() {
 		if($('#rcp-user').val() == '') {
 			alert(rcp_vars.missing_username);

@@ -159,6 +159,16 @@ function rcp_options_install( $network_wide = false ) {
 
 	}
 
+	// Insert default notices.
+	$reminders = new RCP_Reminders();
+	$notices   = $reminders->get_notices();
+	if ( empty( $notices ) ) {
+		$notices[] = $reminders->get_default_notice( 'renewal' );
+		$notices[] = $reminders->get_default_notice( 'expiration' );
+
+		update_option( 'rcp_reminder_notices', $notices );
+	}
+
 	update_option( 'rcp_settings', $rcp_options );
 
 	// and option that allows us to make sure RCP is installed

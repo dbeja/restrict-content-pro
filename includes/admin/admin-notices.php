@@ -219,6 +219,31 @@ function rcp_admin_notices() {
 		}
 	}
 
+	// Subscription reminder messages.
+	if( current_user_can( 'rcp_manage_settings' ) ) {
+		switch( $message ) {
+			case 'reminder_added' :
+
+				$text = __( 'Subscription reminder added', 'rcp' );
+				break;
+
+			case 'reminder_updated' :
+
+				$text = __( 'Subscription reminder updated', 'rcp' );
+				break;
+
+			case 'reminder_deleted' :
+
+				$text = __( 'Subscription reminder deleted', 'rcp' );
+				break;
+
+			case 'test_reminder_sent' :
+
+				$text = __( 'Test reminder sent successfully', 'rcp' );
+				break;
+		}
+	}
+
 	if( $message ) {
 		echo '<div class="' . $class . '"><p>' . $text . '</p></div>';
 	}

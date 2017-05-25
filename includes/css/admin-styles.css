@@ -136,6 +136,17 @@
 	text-align: center;
 }
 
+.rcp-delete {
+	color: red;
+}
+
+/* Reminder Emails
+-------------------------------------------------------------- */
+.rcp-email-reminders th {
+	font-size: 14px;
+	padding-left: 10px !important;
+}
+
 /* Input Fields
 -------------------------------------------------------------- */
 #rcp-name, #rcp-description, #rcp-code, #rcp-user, #rcp-userlogin, #rcp-email, #rcp-key, #rcp-payment-profile-id {

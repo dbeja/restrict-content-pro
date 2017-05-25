@@ -901,23 +901,30 @@ function rcp_add_prorate_message() {
 add_action( 'rcp_before_subscription_form_fields', 'rcp_add_prorate_message' );
 
 /**
- * Removes the _rcp_expiring_soon_email_sent user meta flag when the member's status is set to active.
+ * Removes the reminder sent flags when the member's status is set to active.
+ * This allows the reminders to be re-sent for the next subscription period.
  *
- * @param string $status  User's membership status.
- * @param int    $user_id ID of the user.
+ * @param string     $status     User's membership status.
+ * @param int        $user_id    ID of the user.
+ * @param string     $old_status Old status from before the update.
+ * @param RCP_Member $member     Member object.
  *
  * @since 2.5.5
  * @return void
  */
-function rcp_remove_expiring_soon_email_sent_flag( $status, $user_id ) {
+function rcp_remove_expiring_soon_email_sent_flag( $status, $user_id, $old_status, $member ) {
 
-	if( 'active' !== $status ) {
+	if ( 'active' !== $status ) {
 		return;
 	}
 
-	delete_user_meta( $user_id, '_rcp_expiring_soon_email_sent' );
+	global $wpdb;
+
+	$query = $wpdb->prepare( "DELETE FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key LIKE %s", $user_id, '_rcp_reminder_sent_' . absint( $member->get_subscription_id() ) . '_%' );
+	$wpdb->query( $query );
+
 }
-add_action( 'rcp_set_status', 'rcp_remove_expiring_soon_email_sent_flag', 10, 2 );
+add_action( 'rcp_set_status', 'rcp_remove_expiring_soon_email_sent_flag', 10, 4 );
 
 /**
  * Trigger email verification during registration.

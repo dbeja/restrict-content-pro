@@ -104,54 +104,9 @@ add_action( 'rcp_expired_users_check', 'rcp_check_for_expired_users' );
  */
 function rcp_check_for_soon_to_expire_users() {
 
-	$renewal_period = rcp_get_renewal_reminder_period();
+	$reminders = new RCP_Reminders();
+	$reminders->send_reminders();
 
-	if( 'none' == $renewal_period )
-		return; // Don't send renewal reminders
-
-	$args = array(
-		'meta_query'     => array(
-			'relation'   => 'AND',
-			array(
-				'key'    => 'rcp_expiration',
-				'value'  => current_time( 'mysql' ),
-				'type'   => 'DATETIME',
-				'compare'=> '>='
-			),
-			array(
-				'key'    => 'rcp_expiration',
-				'value'  => date( 'Y-m-d H:i:s', strtotime( $renewal_period, current_time( 'timestamp' ) ) ),
-				'type'   => 'DATETIME',
-				'compare'=> '<='
-			),
-			array(
-				'key'    => 'rcp_recurring',
-				'compare'=> 'NOT EXISTS'
-			),
-			array(
-				'key'    => 'rcp_status',
-				'compare'=> '=',
-				'value'  => 'active'
-			)
-		),
-		'number' 		=> 9999,
-		'count_total' 	=> false,
-		'fields'        => 'ids'
-	);
-
-	$expiring_members = get_users( $args );
-	if( $expiring_members ) {
-		foreach( $expiring_members as $member ) {
-
-			if( get_user_meta( $member, '_rcp_expiring_soon_email_sent', true ) )
-				continue;
-
-			rcp_email_expiring_notice( $member );
-			add_user_meta( $member, '_rcp_expiring_soon_email_sent', 'yes' );
-			rcp_add_member_note( $member, __( 'Expiration notice was emailed to the member.', 'rcp' ) );
-
-		}
-	}
 }
 add_action( 'rcp_send_expiring_soon_notice', 'rcp_check_for_soon_to_expire_users' );
 

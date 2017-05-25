@@ -423,47 +423,6 @@ function rcp_get_content_subscription_levels( $post_id = 0 ) {
 	return apply_filters( 'rcp_get_content_subscription_levels', $levels, $post_id );
 }
 
-
-/**
- * Retrieve the renewal reminder periods
- *
- * @since       1.6
- * @access      public
- * @return      array
-*/
-function rcp_get_renewal_reminder_periods() {
-	$periods = array(
-		'none'      => __( 'None, reminders disabled', 'rcp' ),
-		'+1 day'    => __( 'One day before expiration', 'rcp' ),
-		'+2 days'   => __( 'Two days before expiration', 'rcp' ),
-		'+3 days'   => __( 'Three days before expiration', 'rcp' ),
-		'+4 days'   => __( 'Four days before expiration', 'rcp' ),
-		'+5 days'   => __( 'Five days before expiration', 'rcp' ),
-		'+6 days'   => __( 'Six days before expiration', 'rcp' ),
-		'+1 week'   => __( 'One week before expiration', 'rcp' ),
-		'+2 weeks'  => __( 'Two weeks before expiration', 'rcp' ),
-		'+3 weeks'  => __( 'Three weeks before expiration', 'rcp' ),
-		'+1 month'  => __( 'One month before expiration', 'rcp' ),
-		'+2 months' => __( 'Two months before expiration', 'rcp' ),
-		'+3 months' => __( 'Three months before expiration', 'rcp' ),
-	);
-	return apply_filters( 'rcp_renewal_reminder_periods', $periods );
-}
-
-
-/**
- * Retrieve the renewal reminder period that is enabled
- *
- * @since       1.6
- * @access      public
- * @return      string
-*/
-function rcp_get_renewal_reminder_period() {
-	global $rcp_options;
-	$period = isset( $rcp_options['renewal_reminder_period'] ) ? $rcp_options['renewal_reminder_period'] : 'none';
-	return apply_filters( 'rcp_get_renewal_reminder_period', $period );
-}
-
 /**
  * Get taxonomies that can be restricted
  *
