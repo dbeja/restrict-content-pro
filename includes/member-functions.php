@@ -658,7 +658,7 @@ function rcp_print_user_payments( $user_id ) {
 function rcp_print_user_payments_formatted( $user_id ) {
 
 	$payments = new RCP_Payments;
-	$user_payments = $payments->get_payments( array( 'user_id' => $user_id, 'status' => 'complete' ) );
+	$user_payments = $payments->get_payments( array( 'user_id' => $user_id ) );
 	$payments_list = '';
 
 	if ( ! $user_payments ) {
@@ -680,6 +680,7 @@ function rcp_print_user_payments_formatted( $user_id ) {
 				<th scope="col"><?php _e( 'Payment Type', 'rcp' ); ?></th>
 				<th scope="col"><?php _e( 'Transaction ID', 'rcp' ); ?></th>
 				<th scope="col"><?php _e( 'Amount', 'rcp' ); ?></th>
+				<th scope="col"><?php _e( 'Status', 'rcp' ); ?></th>
 				<th scope="col"><?php _e( 'Invoice', 'rcp' ); ?></th>
 			</tr>
 		</thead>
@@ -696,6 +697,7 @@ function rcp_print_user_payments_formatted( $user_id ) {
 					<td data-colname="<?php esc_attr_e( 'Payment Type', 'rcp' ); ?>"><?php echo esc_html( $payment->payment_type ); ?></td>
 					<td data-colname="<?php esc_attr_e( 'Transaction ID', 'rcp' ); ?>"><?php echo rcp_get_merchant_transaction_id_link( $payment ); ?></td>
 					<td data-colname="<?php esc_attr_e( 'Amount', 'rcp' ); ?>"><?php echo ( '' == $payment->amount ) ? esc_html( rcp_currency_filter( $payment->amount2 ) ) : esc_html( rcp_currency_filter( $payment->amount ) ); ?></td>
+					<td data-colname="<?php esc_attr_e( 'Status', 'rcp' ); ?>"><?php echo rcp_get_payment_status_label( $payment ); ?></td>
 					<td data-colname="<?php esc_attr_e( 'Invoice', 'rcp' ); ?>"><a href="<?php echo esc_url( rcp_get_invoice_url( $payment->id ) ); ?>" target="_blank"><?php _e( 'View Invoice', 'rcp' ); ?></a></td>
 				</tr>
 

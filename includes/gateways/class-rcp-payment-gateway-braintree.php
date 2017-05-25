@@ -210,7 +210,7 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 						$rcp_payments_db->update( $this->payment->id, array(
 							'date'           => date( 'Y-m-d g:i:s', time() ),
 							'transaction_id' => $single_payment->transaction->id,
-						    'status'         => 'complete'
+							'status'         => 'complete'
 						) );
 
 

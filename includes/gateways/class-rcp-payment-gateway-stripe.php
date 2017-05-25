@@ -497,12 +497,12 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 						// setup payment data
 						$payment_data = array(
-							'date'              => date_i18n( 'Y-m-d g:i:s', $event->created ),
-							'payment_type' 		=> 'Credit Card',
-							'user_id' 			=> $member->ID,
-							'amount'            => '',
-							'transaction_id'    => '',
-							'status'            => 'complete'
+							'date'           => date_i18n( 'Y-m-d g:i:s', $event->created ),
+							'payment_type'   => 'Credit Card',
+							'user_id'        => $member->ID,
+							'amount'         => '',
+							'transaction_id' => '',
+							'status'         => 'complete'
 						);
 
 						if ( $event->type == 'charge.succeeded' ) {
