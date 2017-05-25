@@ -129,9 +129,11 @@ class RCP_Upgrades {
 			// Update notices.
 			if ( ! empty( $reminders_to_add ) ) {
 				update_option( 'rcp_reminder_notices', $reminders_to_add );
-
-				$this->upgraded = true;
 			}
+
+			@rcp_options_install();
+
+			$this->upgraded = true;
 
 		}
 
