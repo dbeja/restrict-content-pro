@@ -54,7 +54,7 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 			<td>
 				<?php
 				if ( ! empty( $subscription ) ) {
-					printf( __( '%s - <a href="%s">Edit</a>', 'rcp' ), esc_html( $subscription->name ), esc_url( admin_url( 'admin.php?page=rcp-member-levels&edit_subscription=' . absint( $subscription->id ) ) ) );
+					echo '<a href="' . esc_url( admin_url( 'admin.php?page=rcp-member-levels&edit_subscription=' . absint( $subscription->id ) ) ) . '">' . esc_html( $subscription->name ) . '</a>';
 				}
 				?>
 				<p class="description"><?php _e( 'Subscription level this payment was for', 'rcp' ); ?></p>
