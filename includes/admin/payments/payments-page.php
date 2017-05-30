@@ -60,11 +60,11 @@ function rcp_payments_page() {
 			</a>
 		</h1>
 
-        <?php if ( 'pending' === $status ) : ?>
-            <div class="notice notice-large notice-warning">
-                 <?php printf( __( 'Pending payments are converted to Complete when finalized. Read more about pending payments <a href="%s">here</a>.', 'rcp' ), 'http://docs.restrictcontentpro.com/' ); // @todo update link ?>
-            </div>
-        <?php endif; ?>
+		<?php if ( 'pending' === $status ) : ?>
+			<div class="notice notice-large notice-warning">
+				<?php printf( __( 'Pending payments are converted to Complete when finalized. Read more about pending payments <a href="%s">here</a>.', 'rcp' ), 'http://docs.restrictcontentpro.com/' ); // @todo update link ?>
+			</div>
+		<?php endif; ?>
 
 		<?php do_action('rcp_payments_page_top'); ?>
 
