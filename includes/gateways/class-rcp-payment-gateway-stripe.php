@@ -485,7 +485,9 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 				// check to confirm this is a stripe subscriber
 				if ( $member ) {
 
-					if( ! $member->get_subscription_id() ) {
+				    $subscription_level_id = $member->get_subscription_id();
+
+					if( ! $subscription_level_id ) {
 						die( 'no subscription ID for member' );
 					}
 
@@ -497,12 +499,13 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 						// setup payment data
 						$payment_data = array(
-							'date'           => date_i18n( 'Y-m-d g:i:s', $event->created ),
-							'payment_type'   => 'Credit Card',
-							'user_id'        => $member->ID,
-							'amount'         => '',
-							'transaction_id' => '',
-							'status'         => 'complete'
+							'date'                  => date_i18n( 'Y-m-d g:i:s', $event->created ),
+							'payment_type'          => 'Credit Card',
+							'user_id'               => $member->ID,
+							'amount'                => '',
+							'transaction_id'        => '',
+							'subscription_level_id' => $subscription_level_id,
+							'status'                => 'complete'
 						);
 
 						if ( $event->type == 'charge.succeeded' ) {
@@ -571,7 +574,7 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 								$member->renew( $member->is_recurring(), 'active', $expiration );
 
 								// These must be retrieved after the status is set to active in order for upgrades to work properly
-								$payment_data['subscription']     = $member->get_subscription_id();
+								$payment_data['subscription']     = $member->get_subscription_name();
 								$payment_data['subscription_key'] = $member->get_subscription_key();
 								$payment_id                       = $rcp_payments->insert( $payment_data );
 
