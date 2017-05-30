@@ -83,7 +83,7 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 				<label for="rcp-gateway"><?php _e( 'Gateway', 'rcp' ); ?></label>
 			</th>
 			<td>
-				<?php echo ! empty( $payment->gateway ) ? ucwords( $payment->gateway ) : __( 'Unknown', 'rcp' ); ?>
+				<?php echo ! empty( $payment->gateway ) ? ucwords( $payment->gateway ) : __( 'Unknown gateway used', 'rcp' ); ?>
 				<p class="description"><?php _e( 'Gateway used to make the payment', 'rcp' ); ?></p>
 			</td>
 		</tr>
