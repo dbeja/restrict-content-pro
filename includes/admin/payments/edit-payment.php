@@ -65,7 +65,7 @@ $subscription = rcp_get_subscription_details( $payment->subscription_level_id );
 				<label for="rcp-discount-code"><?php _e( 'Discount Code', 'rcp' ); ?></label>
 			</th>
 			<td>
-				<?php echo ! empty( $payment->discount_code ) ? esc_html( $payment->discount_code ) : __( 'None', 'rcp' ); ?>
+				<?php echo ! empty( $payment->discount_code ) ? esc_html( $payment->discount_code ) : __( 'No discount used', 'rcp' ); ?>
 				<p class="description"><?php _e( 'Discount code used when making this payment', 'rcp' ); ?></p>
 			</td>
 		</tr>
