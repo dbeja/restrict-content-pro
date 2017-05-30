@@ -322,6 +322,7 @@ class RCP_Payments {
 
 			if ( ! empty( $gateway ) ) {
 				$data_to_update['gateway'] = $gateway;
+				$payment->gateway = $gateway;
 			}
 
 		}
