@@ -296,41 +296,11 @@ class RCP_Payments {
 
 		$payment = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->db_name} WHERE id = %d", absint( $payment_id ) ) );
 
-		$data_to_update = array();
-
 		if ( empty( $payment->status ) ) {
 			$payment->status = 'complete';
 		}
 
-		// Back-fill subscription level ID (added in version 2.9).
-		if ( empty( $payment->subscription_level_id ) ) {
-
-			// Get the level ID from the name and update it in the database.
-			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
-
-			if ( ! empty( $subscription ) ) {
-				$payment->subscription_level_id          = absint( $subscription->id );
-				$data_to_update['subscription_level_id'] = absint( $subscription->id );
-			}
-
-		}
-
-		// Back-fill gateway (added in version 2.9).
-		if ( empty( $payment->gateway ) && ! empty( $payment->payment_type ) ) {
-
-			$gateway = $this->get_payment_gateway( $payment );
-
-			if ( ! empty( $gateway ) ) {
-				$data_to_update['gateway'] = $gateway;
-				$payment->gateway = $gateway;
-			}
-
-		}
-
-		// Update any data.
-		if ( ! empty( $data_to_update ) ) {
-			$this->update( $payment->id, $data_to_update );
-		}
+		$payment = $this->backfill_payment_data( $payment );
 
 		return $payment;
 
@@ -395,6 +365,10 @@ class RCP_Payments {
 			case 'braintree credit card initial payment' :
 			case 'braintree credit card' :
 				$gateway = 'braintree';
+				break;
+
+			case 'manual' :
+				$gateway = 'manual';
 				break;
 
 		}
@@ -511,7 +485,7 @@ class RCP_Payments {
 
 				if ( ! empty( $args['date']['end'] ) ) {
 
-					$end    = date( 'Y-m-d 00:00:00', strtotime( $args['date']['end'] ) );
+					$end    = date( 'Y-m-d 11:59:59', strtotime( $args['date']['end'] ) );
 					$where   .= " AND `date` <= %s";
 					$values[] = $end;
 
@@ -607,22 +581,7 @@ class RCP_Payments {
 
 		foreach ( $payments as $key => $payment ) {
 
-			/*
-			 * Make sure the subscription level ID exists for each payment.
-			 * subscription_level_id was added in 2.9 and we need to back-fill the data.
-			 */
-
-			if ( ! empty( $payment->subscription_level_id ) || empty( $payment->subscription ) ) {
-				continue;
-			}
-
-			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
-
-			if ( empty( $subscription ) ) {
-				continue;
-			}
-
-			$payment->subscription_level_id = $subscription->id;
+			$payment = $this->backfill_payment_data( $payment );
 
 			$payments[ $key ] = $payment;
 
@@ -632,6 +591,51 @@ class RCP_Payments {
 
 	}
 
+	/**
+	 * Backfills any missing payment data introduced in RCP 2.9+
+	 * and updates the payment record accordingly.
+	 *
+	 * @access private
+	 * @since 2.9
+	 *
+	 * @param stdClass $payment The payment object.
+	 *
+	 * @return stdClass The updated payment object.
+	 */
+	private function backfill_payment_data( $payment ) {
+
+		$data_to_update = array();
+
+		/** Backfill the subscription level ID. */
+		if ( empty( $payment->subscription_level_id ) && ! empty( $payment->subscription ) ) {
+
+			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
+
+			if ( ! empty( $subscription ) ) {
+				$payment->subscription_level_id = $subscription->id;
+				$data_to_update['subscription_level_id'] = absint( $subscription->id );
+			}
+
+		}
+
+		/** Backfill the gateway */
+		if ( empty( $payment->gateway ) && ! empty( $payment->payment_type ) ) {
+
+			$gateway = $this->get_payment_gateway( $payment );
+
+			if ( ! empty( $gateway ) ) {
+				$payment->gateway = $gateway;
+				$data_to_update['gateway'] = $gateway;
+			}
+
+		}
+
+		if ( ! empty( $data_to_update ) ) {
+			$this->update( $payment->id, $data_to_update );
+		}
+
+		return $payment;
+	}
 
 	/**
 	 * Count the total number of payments in the database
