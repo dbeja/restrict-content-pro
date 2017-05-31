@@ -276,7 +276,7 @@ class RCP_Payments {
 
 		rcp_log( sprintf( 'Deleted payment #%d.', $payment_id ) );
 
-		$remove = $wpdb->query( $wpdb->prepare( "DELETE FROM {$this->db_name} WHERE `id` = '%d';", absint( $payment_id ) ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$this->db_name} WHERE `id` = '%d';", absint( $payment_id ) ) );
 
 	}
 
