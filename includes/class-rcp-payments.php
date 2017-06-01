@@ -485,7 +485,7 @@ class RCP_Payments {
 
 				if ( ! empty( $args['date']['end'] ) ) {
 
-					$end    = date( 'Y-m-d 11:59:59', strtotime( $args['date']['end'] ) );
+					$end    = date( 'Y-m-d 23:59:59', strtotime( $args['date']['end'] ) );
 					$where   .= " AND `date` <= %s";
 					$values[] = $end;
 
