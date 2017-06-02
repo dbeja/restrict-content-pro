@@ -134,14 +134,14 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 
 				// Look to see if we have an existing subscription to cancel
 				if( $member->just_upgraded() && $member->can_cancel() ) {
-					$cancelled = $member->cancel_payment_profile( false );
+					$member->cancel_payment_profile( false );
 				}
 
 				$rcp_payments_db->update( $this->payment->id, array(
 					'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 					'payment_type'     => $payment_type,
 					'transaction_id'   => $charge['response']['orderNumber'],
-				    'status'           => 'complete'
+					'status'           => 'complete'
 				) );
 
 				do_action( 'rcp_gateway_payment_processed', $member, $this->payment->id, $this );

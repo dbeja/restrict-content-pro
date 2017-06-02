@@ -594,7 +594,7 @@ function rcp_get_payment_status_label( $payment ) {
 	if( ! $payment ) {
 		return '';
 	}
-	
+
 	$status = ! empty( $payment->status ) ? $payment->status : 'complete';
 
 	switch( $status ) {
@@ -617,9 +617,7 @@ function rcp_get_payment_status_label( $payment ) {
 
 		case 'complete' :
 		default :
-
 			$label = __( 'Complete', 'rcp' );
-
 			break;
 	}
 
