@@ -160,10 +160,10 @@ function rcp_mark_abandoned_payments() {
 	$args = array(
 		'fields' => 'id',
 		'number' => 9999,
-	    'status' => 'pending',
-	    'date'   => array(
-	    	'end' => date( 'Y-m-d', strtotime( '-7 days', current_time( 'timestamp' ) ) )
-	    )
+		'status' => 'pending',
+		'date'   => array(
+		'end'    => date( 'Y-m-d', strtotime( '-7 days', current_time( 'timestamp' ) ) )
+		)
 	);
 
 	$payments = $rcp_payments_db->get_payments( $args );
