@@ -867,7 +867,7 @@ class RCP_Member extends WP_User {
 		global $rcp_payments_db;
 
 		$pending_level_id = get_user_meta( $this->ID, 'rcp_pending_subscription_level', true );
-		$pending_payment  = get_user_meta( $this->ID, 'rcp_pending_payment_id', true );
+		$pending_payment  = $this->get_pending_payment_id();
 
 		if ( ! empty( $pending_payment ) ) {
 			$payment          = $rcp_payments_db->get_payment( absint( $pending_payment ) );
@@ -931,7 +931,7 @@ class RCP_Member extends WP_User {
 		global $rcp_payments_db;
 
 		$pending_key      = get_user_meta( $this->ID, 'rcp_pending_subscription_key', true );
-		$pending_payment  = get_user_meta( $this->ID, 'rcp_pending_payment_id', true );
+		$pending_payment  = $this->get_pending_payment_id();
 
 		if ( ! empty( $pending_payment ) ) {
 			$payment     = $rcp_payments_db->get_payment( absint( $pending_payment ) );
