@@ -986,11 +986,16 @@ add_action( 'rcp_form_processing', 'rcp_set_email_verification_flag', 10, 3 );
  */
 function rcp_remove_subscription_data_on_failure( $gateway ) {
 
-	// Delete the pending payment.
-	if( ! empty( $gateway->user_id ) && is_a( $gateway->payment, 'RCP_Payment' ) ) {
-		$gateway->payment->update( array(
-			'status' => 'failed'
-		) );
+	// Mark the pending payment as failed.
+	if( ! empty( $gateway->user_id ) && is_object( $gateway->payment ) ) {
+
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
+		$rcp_payments_db->update( $gateway->payment->id, array( 'status' => 'failed' ) );
+
 	}
 
 	// Log error.
