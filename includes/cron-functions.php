@@ -162,7 +162,7 @@ function rcp_mark_abandoned_payments() {
 		'number' => 9999,
 		'status' => 'pending',
 		'date'   => array(
-		'end'    => date( 'Y-m-d', strtotime( '-7 days', current_time( 'timestamp' ) ) )
+			'end' => date( 'Y-m-d', strtotime( '-7 days', current_time( 'timestamp' ) ) )
 		)
 	);
 

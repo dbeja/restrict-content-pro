@@ -594,22 +594,25 @@ function rcp_get_payment_status_label( $payment ) {
 	if( ! $payment ) {
 		return '';
 	}
-
-	$label  = '';
+	
 	$status = ! empty( $payment->status ) ? $payment->status : 'complete';
 
 	switch( $status ) {
 
 		case 'pending' :
-
 			$label = __( 'Pending', 'rcp' );
-
 			break;
 
 		case 'refunded' :
-
 			$label = __( 'Refunded', 'rcp' );
+			break;
 
+		case 'abandoned' :
+			$label = __( 'Abandoned', 'rcp' );
+			break;
+
+		case 'failed' :
+			$label = __( 'Failed', 'rcp' );
 			break;
 
 		case 'complete' :
