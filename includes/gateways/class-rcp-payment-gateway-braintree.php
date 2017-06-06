@@ -379,6 +379,10 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 			if ( $this->is_trial() ) {
 
 				$member->renew( true, 'active', $result->subscription->nextBillingDate->format( 'Y-m-d 23:59:59' ) );
+				$rcp_payments_db->update( $this->payment->id, array(
+					'payment_type'   => 'Braintree Credit Card',
+					'status'         => 'complete'
+				) );
 
 			/**
 			 * If this subscription used a one-time discount,
