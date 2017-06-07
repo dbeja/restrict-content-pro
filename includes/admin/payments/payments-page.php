@@ -43,6 +43,7 @@ function rcp_payments_page() {
 	$complete_count  = $rcp_payments->count( array( 'status' => 'complete' ) );
 	$pending_count   = $rcp_payments->count( array( 'status' => 'pending' ) );
 	$refunded_count  = $rcp_payments->count( array( 'status' => 'refunded' ) );
+	$failed_count    = $rcp_payments->count( array( 'status' => 'failed' ) );
 	?>
 
 	<div class="wrap">
@@ -109,6 +110,14 @@ function rcp_payments_page() {
 					</a>
 				</li>
 			<?php endif; ?>
+			<?php if ( $failed_count > 0 ) : ?>
+				<li>
+					|<a href="<?php echo esc_url( add_query_arg( 'status', 'failed', $current_page ) ); ?>" title="<?php esc_attr_e( 'View failed payments', 'rcp' ); ?>"<?php echo 'failed' == $status ? ' class="current"' : ''; ?>>
+						<?php _e( 'Failed', 'rcp' ); ?>
+						<span class="count">(<?php echo $failed_count; ?>)</span>
+					</a>
+				</li>
+		<?php endif; ?>
 		</ul>
 
 		<p class="total"><strong><?php _e( 'Total Earnings', 'rcp' ); ?>: <?php echo rcp_currency_filter( number_format_i18n( $rcp_payments->get_earnings(), 2 ) ); ?></strong></p>
