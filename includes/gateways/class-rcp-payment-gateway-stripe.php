@@ -298,6 +298,7 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 
 				// Complete pending payment. This also updates the expiration date, status, etc.
 				$rcp_payments_db->update( $this->payment->id, array(
+					'payment_type'   => 'Credit Card One Time',
 					'transaction_id' => $charge->id,
 					'status'         => 'complete'
 				) );
