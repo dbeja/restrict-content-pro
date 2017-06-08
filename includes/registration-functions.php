@@ -1037,10 +1037,11 @@ function rcp_complete_registration( $payment_id, $payment ) {
 
 	// This updates the expiration date, status, discount code usage, role, etc.
 	$args = array(
-		'status'          => 'active',
-		'subscription_id' => $subscription_id,
-		'discount_code'   => $payment->discount_code,
-	    'recurring'       => $member->is_recurring()
+		'status'           => 'active',
+		'subscription_id'  => $subscription_id,
+		'discount_code'    => $payment->discount_code,
+		'recurring'        => $member->is_recurring(),
+		'subscription_key' => $member->get_pending_subscription_key()
 	);
 
 	if ( empty( $payment->amount ) && ! empty( $subscription->trial_duration ) && ! $member->is_trialing() ) {
