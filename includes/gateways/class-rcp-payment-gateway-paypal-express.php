@@ -216,7 +216,7 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 					unset( $args['INITAMT'] );
 				}
 
-				if ( $details['is_trial'] ) {
+				if ( ! empty( $details['is_trial'] ) ) {
 					// Set profile start date to the end of the free trial.
 					$args['PROFILESTARTDATE'] = date( 'Y-m-d\TH:i:s', strtotime( '+' . $details['subscription']['trial_duration'] . ' ' . $details['subscription']['trial_duration_unit'], current_time( 'timestamp' ) ) );
 
@@ -341,16 +341,17 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 
 						$payment_data = array(
 							'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
-							'subscription'     => $member->get_subscription_name(),
+							'subscription'     => $member->get_pending_subscription_name(),
 							'payment_type'     => 'PayPal Express One Time',
-							'subscription_key' => $member->get_subscription_key(),
+							'subscription_key' => $member->get_pending_subscription_key(),
 							'amount'           => $body['PAYMENTINFO_0_AMT'],
 							'user_id'          => $member->ID,
-							'transaction_id'   => $body['PAYMENTINFO_0_TRANSACTIONID']
+							'transaction_id'   => $body['PAYMENTINFO_0_TRANSACTIONID'],
+							'status'           => 'complete'
 						);
 
 						$rcp_payments = new RCP_Payments;
-						$rcp_payments->insert( $payment_data );
+						$rcp_payments->update( $member->get_pending_payment_id(), $payment_data );
 
 						wp_redirect( esc_url_raw( rcp_get_return_url() ) ); exit;
 
