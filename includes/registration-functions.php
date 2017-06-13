@@ -200,7 +200,7 @@ function rcp_process_registration() {
 		'subscription_id'  => $subscription_id,
 		'discount_code'    => $discount,
 		'subscription_key' => $subscription_key,
-	    'status'           => 'active'
+		'status'           => 'active'
 	);
 
 	// process a paid subscription
