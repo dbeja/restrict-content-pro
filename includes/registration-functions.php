@@ -196,33 +196,11 @@ function rcp_process_registration() {
 
 	do_action( 'rcp_form_processing', $_POST, $user_data['id'], $price );
 
-	// Create a pending payment
-	delete_user_meta( $user_data['id'], 'rcp_pending_payment_id' );
-	$amount = ( ! empty( $trial_duration ) && ! rcp_has_used_trial() ) ? 0.00 : rcp_get_registration()->get_total();
-	$payment_data = array(
-		'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
-		'subscription'          => $subscription->name,
-		'subscription_level_id' => $subscription->id,
-		'gateway'               => $gateway,
-		'subscription_key'      => $subscription_key,
-		'amount'                => $amount,
-		'user_id'               => $user_data['id'],
-		'status'                => 'pending',
-		'subtotal'              => $subscription->price,
-		'credits'               => $member->get_prorate_credit_amount(),
-		'fees'                  => rcp_get_registration()->get_total_fees() + $member->get_prorate_credit_amount(),
-		'discount_amount'       => rcp_get_registration()->get_total_discounts(),
-		'discount_code'         => $discount,
-	);
-
-	$rcp_payments = new RCP_Payments();
-	$payment_id   = $rcp_payments->insert( $payment_data );
-	update_user_meta( $user_data['id'], 'rcp_pending_payment_id', $payment_id );
-
 	$member_data = array(
 		'subscription_id'  => $subscription_id,
 		'discount_code'    => $discount,
-		'subscription_key' => $subscription_key
+		'subscription_key' => $subscription_key,
+	    'status'           => 'active'
 	);
 
 	// process a paid subscription
@@ -241,6 +219,29 @@ function rcp_process_registration() {
 			wp_redirect( rcp_get_return_url( $user_data['id'] ) ); exit;
 
 		}
+
+		// Create a pending payment
+		delete_user_meta( $user_data['id'], 'rcp_pending_payment_id' );
+		$amount = ( ! empty( $trial_duration ) && ! rcp_has_used_trial() ) ? 0.00 : rcp_get_registration()->get_total();
+		$payment_data = array(
+			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
+			'subscription'          => $subscription->name,
+			'subscription_level_id' => $subscription->id,
+			'gateway'               => $gateway,
+			'subscription_key'      => $subscription_key,
+			'amount'                => $amount,
+			'user_id'               => $user_data['id'],
+			'status'                => 'pending',
+			'subtotal'              => $subscription->price,
+			'credits'               => $member->get_prorate_credit_amount(),
+			'fees'                  => rcp_get_registration()->get_total_fees() + $member->get_prorate_credit_amount(),
+			'discount_amount'       => rcp_get_registration()->get_total_discounts(),
+			'discount_code'         => $discount,
+		);
+
+		$rcp_payments = new RCP_Payments();
+		$payment_id   = $rcp_payments->insert( $payment_data );
+		update_user_meta( $user_data['id'], 'rcp_pending_payment_id', $payment_id );
 
 		// Remove trialing status, if it exists
 		if ( ! $trial_duration || $trial_duration && $member_has_trialed ) {
@@ -289,6 +290,11 @@ function rcp_process_registration() {
 
 	// process a free or trial subscription
 	} else {
+
+		// If the subscription is forever, member status is "free".
+		if ( $subscription->duration == 0 ) {
+			$member_data['status'] = 'free';
+		}
 
 		rcp_add_subscription_to_user( $user_data['id'], $member_data );
 
