@@ -66,7 +66,8 @@ class RCP_Payments {
 
 		$defaults = array(
 			'subscription'          => '',
-			'subscription_level_id' => 0,
+			'object_id'             => 0,
+			'type'                  => 'subscription',
 			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 			'amount'                => 0.00, // Total amount after fees/credits/discounts are added.
 			'user_id'               => 0,
@@ -89,11 +90,11 @@ class RCP_Payments {
 		}
 
 		// Backwards compatibility: make sure we store the subscription ID as well.
-		if ( empty( $args['subscription_level_id'] ) && ! empty( $args['subscription'] ) ) {
+		if ( empty( $args['object_id'] ) && ! empty( $args['subscription'] ) ) {
 			$subscription = rcp_get_subscription_details_by_name( $args['subscription'] );
 
 			if ( $subscription ) {
-				$args['subscription_level_id'] = $subscription->id;
+				$args['object_id'] = $subscription->id;
 			}
 		}
 
@@ -123,8 +124,6 @@ class RCP_Payments {
 			// Remove trialing status, if it exists
 			delete_user_meta( $args['user_id'], 'rcp_is_trialing' );
 
-			$payment = $this->get_payment( $payment_id );
-
 			/**
 			 * Triggers when the payment's status is changed. This is here to spoof a status
 			 * change when a payment is first inserted.
@@ -133,12 +132,11 @@ class RCP_Payments {
 			 *
 			 * @param string $new_status New status being set.
 			 * @param int    $payment_id ID of the payment.
-			 * @param array  $args       Array of all payment data.
 			 *
 			 * @since 2.9
 			 */
-			do_action( 'rcp_update_payment_status', $args['status'], $payment_id, $payment );
-			do_action( 'rcp_update_payment_status_' . $args['status'], $payment_id, $payment );
+			do_action( 'rcp_update_payment_status', $args['status'], $payment_id );
+			do_action( 'rcp_update_payment_status_' . $args['status'], $payment_id );
 
 			if ( 'complete' == $args['status'] ) {
 				/**
@@ -229,12 +227,11 @@ class RCP_Payments {
 			 *
 			 * @param string $new_status   New status being set.
 			 * @param int    $payment_id   ID of the payment.
-			 * @param array  $payment_data Array of all data being changed in this update.
 			 *
 			 * @since 2.9
 			 */
-			do_action( 'rcp_update_payment_status', $payment_data['status'], $payment_id, $payment );
-			do_action( 'rcp_update_payment_status_' . $payment_data['status'], $payment_id, $payment );
+			do_action( 'rcp_update_payment_status', $payment_data['status'], $payment_id );
+			do_action( 'rcp_update_payment_status_' . $payment_data['status'], $payment_id );
 
 			if ( 'complete' == $payment_data['status'] ) {
 				$amount  = ! empty( $payment->amount ) ? $payment->amount : 0.00;
@@ -607,13 +604,13 @@ class RCP_Payments {
 		$data_to_update = array();
 
 		/** Backfill the subscription level ID. */
-		if ( empty( $payment->subscription_level_id ) && ! empty( $payment->subscription ) ) {
+		if ( empty( $payment->object_id ) && ! empty( $payment->subscription ) ) {
 
 			$subscription = rcp_get_subscription_details_by_name( $payment->subscription );
 
 			if ( ! empty( $subscription ) ) {
-				$payment->subscription_level_id = $subscription->id;
-				$data_to_update['subscription_level_id'] = absint( $subscription->id );
+				$payment->object_id = $subscription->id;
+				$data_to_update['object_id'] = absint( $subscription->id );
 			}
 
 		}

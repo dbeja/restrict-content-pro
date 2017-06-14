@@ -16,7 +16,7 @@ global $rcp_payments_db;
 $payment_id   = ! empty( $_GET['payment_id'] ) ? absint( $_GET['payment_id'] ) : 0;
 $payment      = $rcp_payments_db->get_payment( $payment_id );
 $user         = get_userdata( $payment->user_id );
-$subscription = rcp_get_subscription_details( $payment->subscription_level_id );
+$subscription = rcp_get_subscription_details( $payment->object_id );
 ?>
 <h1>
 	<?php _e( 'Edit Payment', 'rcp' ); ?> -

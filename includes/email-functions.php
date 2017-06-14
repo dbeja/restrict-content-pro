@@ -344,13 +344,12 @@ add_action( 'rcp_set_status', 'rcp_email_on_cancellation', 11, 2 );
  * Triggers an email to the member when a payment is received.
  *
  * @param int    $payment_id ID of the payment being completed.
- * @param object $payment    Payment object from the database.
  *
  * @access  public
  * @since   2.3
  * @return  void
  */
-function rcp_email_payment_received( $payment_id, $payment ) {
+function rcp_email_payment_received( $payment_id ) {
 
 	global $rcp_options;
 
@@ -358,16 +357,23 @@ function rcp_email_payment_received( $payment_id, $payment ) {
 		return;
 	}
 
+	/**
+	 * @var RCP_Payments $rcp_payments_db
+	 */
+	global $rcp_payments_db;
+
+	$payment = $rcp_payments_db->get_payment( $payment_id );
+
 	$user_info = get_userdata( $payment->user_id );
 
 	if( ! $user_info ) {
 		return;
 	}
 
-	$args = (array) $payment;
+	$payment = (array) $payment;
 
 	$message = ! empty( $rcp_options['payment_received_email'] ) ? $rcp_options['payment_received_email'] : false;
-	$message = apply_filters( 'rcp_payment_received_email', $message, $payment_id, $args );
+	$message = apply_filters( 'rcp_payment_received_email', $message, $payment_id, $payment );
 
 	if( ! $message ) {
 		rcp_log( sprintf( 'Payment Received email not sent to user #%d - message is empty.', $user_info->ID ) );
@@ -376,7 +382,7 @@ function rcp_email_payment_received( $payment_id, $payment ) {
 	}
 
 	$emails = new RCP_Emails;
-	$emails->member_id = $args['user_id'];
+	$emails->member_id = $payment['user_id'];
 	$emails->payment_id = $payment_id;
 
 	$emails->send( $user_info->user_email, $rcp_options['payment_received_subject'], $message );
@@ -384,7 +390,7 @@ function rcp_email_payment_received( $payment_id, $payment ) {
 	rcp_log( sprintf( 'Payment Received email sent to user #%d.', $user_info->ID ) );
 
 }
-add_action( 'rcp_update_payment_status_complete', 'rcp_email_payment_received', 10, 2 );
+add_action( 'rcp_update_payment_status_complete', 'rcp_email_payment_received' );
 
 /**
  * Emails a member when a renewal payment fails.

@@ -266,7 +266,8 @@ function rcp_create_tables() {
 	$sql = "CREATE TABLE {$rcp_payments_db_name} (
 		id bigint(9) NOT NULL AUTO_INCREMENT,
 		subscription varchar(200) NOT NULL,
-		subscription_level_id bigint(9) NOT NULL,
+		object_id bigint(9) NOT NULL,
+		type varchar(20) NOT NULL DEFAULT 'subscription',
 		date datetime NOT NULL,
 		amount mediumtext NOT NULL,
 		subtotal mediumtext NOT NULL,

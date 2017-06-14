@@ -871,7 +871,7 @@ class RCP_Member extends WP_User {
 
 		if ( ! empty( $pending_payment ) ) {
 			$payment          = $rcp_payments_db->get_payment( absint( $pending_payment ) );
-			$pending_level_id = $payment->subscription_level_id;
+			$pending_level_id = $payment->object_id;
 		}
 
 		return $pending_level_id;
@@ -1463,8 +1463,8 @@ class RCP_Member extends WP_User {
 			return 0;
 		}
 
-		if ( ! empty( $payment->subscription_level_id ) ) {
-			$subscription_id = absint( $payment->subscription_level_id );
+		if ( ! empty( $payment->object_id ) ) {
+			$subscription_id = absint( $payment->object_id );
 			$subscription    = rcp_get_subscription_details( $subscription_id );
 		} else {
 			$subscription    = rcp_get_subscription_details_by_name( $payment->subscription );

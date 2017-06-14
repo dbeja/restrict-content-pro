@@ -202,7 +202,7 @@ function rcp_process_registration() {
 	$payment_data = array(
 		'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 		'subscription'          => $subscription->name,
-		'subscription_level_id' => $subscription->id,
+		'object_id'             => $subscription->id,
 		'gateway'               => $gateway,
 		'subscription_key'      => $subscription_key,
 		'amount'                => $amount,
@@ -1015,13 +1015,18 @@ add_action( 'rcp_registration_failed', 'rcp_remove_subscription_data_on_failure'
  * @uses rcp_add_subscription_to_user()
  *
  * @param int    $payment_id ID of the payment being completed.
- * @param object $payment    Payment object.
  *
  * @since 2.9
  * @return void
  */
-function rcp_complete_registration( $payment_id, $payment ) {
+function rcp_complete_registration( $payment_id ) {
 
+	/**
+	 * @var RCP_Payments $rcp_payments_db
+	 */
+	global $rcp_payments_db;
+
+	$payment             = $rcp_payments_db->get_payment( $payment_id );
 	$member              = new RCP_Member( $payment->user_id );
 	$pending_payment_id  = $member->get_pending_payment_id();
 
@@ -1032,7 +1037,7 @@ function rcp_complete_registration( $payment_id, $payment ) {
 
 	rcp_log( sprintf( 'Completing registration for member #%d via payment #%d.', $member->ID, $pending_payment_id ) );
 
-	$subscription_id = $payment->subscription_level_id;
+	$subscription_id = $payment->object_id;
 	$subscription    = rcp_get_subscription_details( $subscription_id );
 
 	// This updates the expiration date, status, discount code usage, role, etc.
@@ -1055,7 +1060,7 @@ function rcp_complete_registration( $payment_id, $payment ) {
 	delete_user_meta( $member->ID, 'rcp_pending_payment_id' );
 
 }
-add_action( 'rcp_update_payment_status_complete', 'rcp_complete_registration', 10, 2 );
+add_action( 'rcp_update_payment_status_complete', 'rcp_complete_registration' );
 
 /**
  * Register a user account as an RCP member, assign a subscription level,

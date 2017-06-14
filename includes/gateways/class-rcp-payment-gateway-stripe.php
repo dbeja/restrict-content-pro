@@ -505,7 +505,7 @@ class RCP_Payment_Gateway_Stripe extends RCP_Payment_Gateway {
 							'user_id'               => $member->ID,
 							'amount'                => '',
 							'transaction_id'        => '',
-							'subscription_level_id' => $subscription_level_id,
+							'object_id'             => $subscription_level_id,
 							'status'                => 'complete'
 						);
 
