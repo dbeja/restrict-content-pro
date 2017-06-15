@@ -226,7 +226,7 @@ function rcp_process_registration() {
 		$payment_data = array(
 			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 			'subscription'          => $subscription->name,
-			'subscription_level_id' => $subscription->id,
+			'object_id'             => $subscription->id,
 			'gateway'               => $gateway,
 			'subscription_key'      => $subscription_key,
 			'amount'                => $amount,
