@@ -423,7 +423,9 @@ class RCP_Payments {
 			'status'       => '',
 			's'            => '',
 			'order'        => 'DESC',
-			'orderby'      => 'id'
+			'orderby'      => 'id',
+			'type'         => '',
+			'object_id'    => ''
 		);
 
 		$args  = wp_parse_args( $args, $defaults );
@@ -551,6 +553,16 @@ class RCP_Payments {
 				}
 			}
 
+		}
+
+		if ( ! empty( $args['type'] ) ) {
+			$where   .= " AND `type` = %s";
+			$values[] = $args['type'];
+		}
+
+		if ( ! empty( $args['object_id'] ) ) {
+			$where   .= " AND `object_id` = %d AND `object_id` != 0";
+			$values[] = $args['object_id'];
 		}
 
 		if ( 'DESC' === strtoupper( $args['order'] ) ) {
