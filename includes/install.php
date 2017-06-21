@@ -267,7 +267,7 @@ function rcp_create_tables() {
 		id bigint(9) NOT NULL AUTO_INCREMENT,
 		subscription varchar(200) NOT NULL,
 		object_id bigint(9) NOT NULL,
-		type varchar(20) NOT NULL DEFAULT 'subscription',
+		object_type varchar(20) NOT NULL DEFAULT 'subscription',
 		date datetime NOT NULL,
 		amount mediumtext NOT NULL,
 		subtotal mediumtext NOT NULL,

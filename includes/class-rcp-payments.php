@@ -67,7 +67,7 @@ class RCP_Payments {
 		$defaults = array(
 			'subscription'          => '',
 			'object_id'             => 0,
-			'type'                  => 'subscription',
+			'object_type'           => 'subscription',
 			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 			'amount'                => 0.00, // Total amount after fees/credits/discounts are added.
 			'user_id'               => 0,
@@ -424,7 +424,7 @@ class RCP_Payments {
 			's'            => '',
 			'order'        => 'DESC',
 			'orderby'      => 'id',
-			'type'         => '',
+			'object_type'  => '',
 			'object_id'    => ''
 		);
 
@@ -555,9 +555,9 @@ class RCP_Payments {
 
 		}
 
-		if ( ! empty( $args['type'] ) ) {
-			$where   .= " AND `type` = %s";
-			$values[] = $args['type'];
+		if ( ! empty( $args['object_type'] ) ) {
+			$where   .= " AND `object_type` = %s";
+			$values[] = $args['object_type'];
 		}
 
 		if ( ! empty( $args['object_id'] ) ) {
