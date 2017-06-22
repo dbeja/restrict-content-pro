@@ -337,8 +337,6 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 
 						}
 
-						$member->renew( false );
-
 						$payment_data = array(
 							'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 							'subscription'     => $member->get_pending_subscription_name(),
@@ -352,6 +350,8 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 
 						$rcp_payments = new RCP_Payments;
 						$rcp_payments->update( $member->get_pending_payment_id(), $payment_data );
+
+						// Membership is activated via rcp_complete_registration()
 
 						wp_redirect( esc_url_raw( rcp_get_return_url() ) ); exit;
 
