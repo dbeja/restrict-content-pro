@@ -110,7 +110,7 @@ class RCP_Payments {
 			}
 		}
 
-		$add = $wpdb->insert( $this->db_name, $args, array( '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ) );
+		$add = $wpdb->insert( $this->db_name, $args, array( '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ) );
 
 		// if insert was succesful, return the payment ID
 		if( $add ) {
