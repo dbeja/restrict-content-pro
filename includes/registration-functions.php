@@ -1055,7 +1055,9 @@ function rcp_complete_registration( $payment_id ) {
 		'subscription_key' => $member->get_pending_subscription_key()
 	);
 
-	if ( empty( (float) $payment->amount ) && ! empty( $subscription->trial_duration ) && ! $member->is_trialing() ) {
+	$amount = (float) $payment->amount;
+
+	if ( empty( $amount ) && ! empty( $subscription->trial_duration ) && ! $member->is_trialing() ) {
 		$args['trial_duration']      = $subscription->trial_duration;
 		$args['trial_duration_unit'] = $subscription->trial_duration_unit;
 	}
