@@ -1086,7 +1086,7 @@ add_action( 'rcp_update_payment_status_complete', 'rcp_complete_registration' );
  *     @type string   $subscription_key    Optional. Subscription key to add to the user's profile.
  *     @type int|bool $trial_duration      Optional. Only supply this to give the user a free trial.
  *     @type string   $trial_duration_unit Optional. `day`, `month`, or `year`.
- *     @type bool     $recurring Optional. Whether or not the subscription is automatically recurring. Default is `false`.
+ *     @type bool     $recurring           Optional. Whether or not the subscription is automatically recurring. Default is `false`.
  *     @type string   $payment_profile_id  Optional. Payment profile ID to add to the user's profile.
  * }
  *
