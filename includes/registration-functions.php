@@ -1077,7 +1077,18 @@ add_action( 'rcp_update_payment_status_complete', 'rcp_complete_registration' );
  * calculate the expiration date, etc.
  *
  * @param int   $user_id ID of the user to add the subscription to.
- * @param array $args    Array of subscription arguments.
+ * @param array $args {
+ *     Array of subscription arguments. Only `subscription_id` is required.
+ *     @type string   $status Optional.    Status to set: free, active, cancelled, or expired. If omitted, set to free or active.
+ *     @type int      $subscription_id     Required. ID number of the subscription level to give the user.
+ *     @type string   $expiration          Optional. Expiration date to give the user in MySQL format. If omitted, calculated automatically.
+ *     @type string   $discount_code       Optional. Name of a discount code to add to the user's profile and increment usage count.
+ *     @type string   $subscription_key    Optional. Subscription key to add to the user's profile.
+ *     @type int|bool $trial_duration      Optional. Only supply this to give the user a free trial.
+ *     @type string   $trial_duration_unit Optional. `day`, `month`, or `year`.
+ *     @type bool     $recurring Optional. Whether or not the subscription is automatically recurring. Default is `false`.
+ *     @type string   $payment_profile_id  Optional. Payment profile ID to add to the user's profile.
+ * }
  *
  * @since 2.9
  * @return bool
@@ -1098,8 +1109,8 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 
 	$args = wp_parse_args( $args, $defaults );
 
-	// Subscription ID and status are required.
-	if ( empty( $args['subscription_id'] ) || empty( $args['status'] ) ) {
+	// Subscription ID ise required.
+	if ( empty( $args['subscription_id'] ) ) {
 		return false;
 	}
 
