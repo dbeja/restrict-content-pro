@@ -189,6 +189,9 @@ function rcp_process_registration() {
 
 	}
 
+	// Delete pending payment ID. A new one may be created for paid subscriptions.
+	delete_user_meta( $user_data['id'], 'rcp_pending_payment_id' );
+
 	// Delete old pending data that may have been added in previous versions.
 	delete_user_meta( $user_data['id'], 'rcp_pending_expiration_date' );
 	delete_user_meta( $user_data['id'], 'rcp_pending_subscription_level' );
@@ -221,7 +224,6 @@ function rcp_process_registration() {
 		}
 
 		// Create a pending payment
-		delete_user_meta( $user_data['id'], 'rcp_pending_payment_id' );
 		$amount = ( ! empty( $trial_duration ) && ! rcp_has_used_trial() ) ? 0.00 : rcp_get_registration()->get_total();
 		$payment_data = array(
 			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
@@ -1112,6 +1114,18 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	}
 
 	/*
+	 * Set the subscription ID and key
+	 * This needs to happen after setting the expiration date in order
+	 * for the prorate credit calculation to work properly.
+	 */
+
+	$member->set_subscription_id( $args['subscription_id'] );
+
+	if ( ! empty( $args['subscription_key'] ) ) {
+		$member->set_subscription_key( $args['subscription_key'] );
+	}
+
+	/*
 	 * Expiration date
 	 * Calculate it if not provided.
 	 */
@@ -1127,18 +1141,6 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 		$expiration = $member->calculate_expiration( $force_now, $args['trial_duration'] );
 	}
 	$member->set_expiration_date( $expiration );
-
-	/*
-	 * Set the subscription ID and key
-	 * This needs to happen after setting the expiration date in order
-	 * for the prorate credit calculation to work properly.
-	 */
-
-	$member->set_subscription_id( $args['subscription_id'] );
-
-	if ( ! empty( $args['subscription_key'] ) ) {
-		$member->set_subscription_key( $args['subscription_key'] );
-	}
 
 	/*
 	 * Discount code

@@ -199,6 +199,7 @@ class RCP_Member extends WP_User {
 	 */
 	public function calculate_expiration( $force_now = false, $trial = false ) {
 
+		// Authorize.net still uses this.
 		$pending_exp = get_user_meta( $this->ID, 'rcp_pending_expiration_date', true );
 
 		if( ! empty( $pending_exp ) ) {
