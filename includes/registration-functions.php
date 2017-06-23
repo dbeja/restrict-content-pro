@@ -1107,6 +1107,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	$member              = new RCP_Member( $user_id );
 	$old_subscription_id = get_user_meta( $member->ID, '_rcp_old_subscription_id', true );
 	$subscription_level  = $rcp_levels_db->get_level( $args['subscription_id'] );
+	$prorated            = $member->get_prorate_credit_amount();
 
 	// Invalid subscription level - bail.
 	if ( empty( $subscription_level ) ) {
@@ -1115,10 +1116,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 
 	/*
 	 * Set the subscription ID and key
-	 * This needs to happen after setting the expiration date in order
-	 * for the prorate credit calculation to work properly.
 	 */
-
 	$member->set_subscription_id( $args['subscription_id'] );
 
 	if ( ! empty( $args['subscription_key'] ) ) {
@@ -1132,7 +1130,6 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	$expiration = $args['expiration'];
 	if ( empty( $expiration ) ) {
 		$force_now = $args['recurring'];
-		$prorated  = $member->get_prorate_credit_amount();
 
 		if ( ! $force_now && ! empty( $prorated ) && rcp_get_subscription_id() != $subscription_level->id ) {
 			$force_now = true;
