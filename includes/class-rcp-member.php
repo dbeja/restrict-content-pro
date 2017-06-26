@@ -1307,7 +1307,7 @@ class RCP_Member extends WP_User {
 		}
 
 		// Check post user role restrictions.
-		if ( $ret && ! empty( $user_level ) && 'All' != $user_level ) {
+		if ( $ret && ! empty( $user_level ) && 'all' != strtolower( $user_level ) ) {
 			if ( ! user_can( $this->ID, strtolower( $user_level ) ) ) {
 				$ret = false;
 			}
