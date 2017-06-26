@@ -143,11 +143,19 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 					$cancelled = $member->cancel_payment_profile( false );
 				}
 
+				$expiration = $member->calculate_expiration();
+				$member->set_subscription_id( $this->subscription_id );
 				$member->set_recurring( $this->auto_renew );
-				$member->set_expiration_date( $member->calculate_expiration() );
+				$member->set_expiration_date( $expiration );
 				$member->set_status( 'active' );
 				$member->add_note( __( 'Subscription started in Authorize.net', 'rcp' ) );
 				$member->set_payment_profile_id( 'anet_' . $response->getSubscriptionId() );
+
+				/*
+				 * Set pending expiration date so this will be used in rcp_add_subscription_to_user() when the webhook
+				 * gets the transaction ID and completes the payment, which may take several hours.
+				 */
+				update_user_meta( $this->user_id, 'rcp_pending_expiration_date', $expiration );
 
 				if ( ! is_user_logged_in() ) {
 
