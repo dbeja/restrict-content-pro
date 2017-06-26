@@ -469,7 +469,7 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 
 		$member = new RCP_Member( $user_id );
 
-		if ( ! $member->get_subscription_id() ) {
+		if ( ! $subscription_id = $member->get_subscription_id() ) {
 			die( 'no subscription ID for member' );
 		}
 
@@ -533,7 +533,9 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 					'amount'           => $transaction->amount,
 					'transaction_id'   => $transaction->id,
 					'subscription'     => $member->get_subscription_name(),
-					'subscription_key' => $member->get_subscription_key()
+					'subscription_key' => $member->get_subscription_key(),
+					'object_type'      => 'subscription',
+					'object_id'        => $subscription_id
 				) );
 
 				$member->add_note( sprintf( __( 'Payment %s collected in Braintree', 'rcp' ), $payment_id ) );
@@ -593,7 +595,9 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 						'amount'           => $transaction->amount,
 						'transaction_id'   => $transaction->id,
 						'subscription'     => $member->get_subscription_name(),
-						'subscription_key' => $member->get_subscription_key()
+						'subscription_key' => $member->get_subscription_key(),
+						'object_type'      => 'subscription',
+						'object_id'        => $subscription_id
 					) );
 
 					$member->add_note( sprintf( __( 'Subscription %s started in Braintree', 'rcp' ), $payment_id ) );
