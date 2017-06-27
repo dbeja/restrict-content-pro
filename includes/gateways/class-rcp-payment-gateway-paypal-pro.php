@@ -175,7 +175,8 @@ class RCP_Payment_Gateway_PayPal_Pro extends RCP_Payment_Gateway {
 
 				if ( isset( $body['TRANSACTIONID'] ) && false !== strpos( strtolower( $body['ACK'] ), 'success' ) ) {
 					// Confirm a one-time payment
-					$member->renew( $this->auto_renew );
+					//$member->renew( $this->auto_renew );
+					// @todo Verify that the above needs to be commented out and see about updating payment to complete here instead of waiting for webhook.
 				}
 
 				wp_redirect( esc_url_raw( rcp_get_return_url() ) ); exit;
