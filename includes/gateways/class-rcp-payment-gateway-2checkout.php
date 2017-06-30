@@ -137,6 +137,7 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 					$member->cancel_payment_profile( false );
 				}
 
+				// This activates the user's account.
 				$rcp_payments_db->update( $this->payment->id, array(
 					'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 					'payment_type'     => $payment_type,
@@ -159,8 +160,6 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 
 		if ( $paid ) {
 
-			// set this user to active
-			$member->renew( $this->auto_renew );
 			$member->add_note( __( 'Subscription started in 2Checkout', 'rcp' ) );
 
 			$member->set_payment_profile_id( '2co_' . $charge['response']['orderNumber'] );
