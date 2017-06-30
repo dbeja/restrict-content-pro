@@ -137,6 +137,8 @@ class RCP_Payment_Gateway_2Checkout extends RCP_Payment_Gateway {
 					$member->cancel_payment_profile( false );
 				}
 
+				$member->set_recurring( $this->auto_renew );
+
 				// This activates the user's account.
 				$rcp_payments_db->update( $this->payment->id, array(
 					'date'             => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
