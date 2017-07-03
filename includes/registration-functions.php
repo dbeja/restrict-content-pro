@@ -1150,6 +1150,9 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	}
 	$member->set_expiration_date( $expiration );
 
+	// Delete pending expiration date (used by Authorize.net). We don't need it anymore after this point.
+	delete_user_meta( $member->ID, 'rcp_pending_expiration_date' );
+
 	/*
 	 * Discount code
 	 * Apply the discount code to the member and increase the number of uses.
