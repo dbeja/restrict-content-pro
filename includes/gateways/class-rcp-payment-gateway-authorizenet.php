@@ -232,7 +232,8 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 					'subscription_key' => $member->get_subscription_key(),
 					'amount'           => $renewal_amount,
 					'user_id'          => $member->ID,
-					'transaction_id'   => $transaction_id
+					'transaction_id'   => $transaction_id,
+					'status'           => 'complete'
 				);
 
 				$pending_payment_id = $member->get_pending_payment_id();
