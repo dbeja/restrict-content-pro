@@ -125,7 +125,19 @@ function rcp_payments_page() {
 					$total_earnings = $total_earnings + $payment->amount;
 					endforeach;
 				else : ?>
-					<tr><td colspan="8"><?php _e( 'No payments recorded yet', 'rcp' ); ?></td></tr>
+					<?php
+
+						/**
+						 * As developers use rcp_payments_page_table_header, they can simply add the number
+						 * of columns they are creating, to this filter, for instance:
+						 * 
+						 * If they are adding 2 columns they can return $columns + 2, this way if multiple itegrations are adding columns
+						 * they will result in them adding up to the same number.
+						 */
+						$columns = apply_filters( 'rcp_payments_total_columns', 7 );
+
+					?>
+					<tr><td colspan="<?php echo $columns; ?>"><?php _e( 'No payments recorded yet', 'rcp' ); ?></td></tr>
 				<?php endif;?>
 				</tbody>
 				<tfoot>
