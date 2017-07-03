@@ -143,7 +143,8 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 					$cancelled = $member->cancel_payment_profile( false );
 				}
 
-				$expiration = $member->calculate_expiration();
+				$force_now  = $this->auto_renew || ( $member->get_subscription_id() != $this->subscription_id );
+				$expiration = $member->calculate_expiration( $force_now );
 				$member->set_subscription_id( $this->subscription_id );
 				$member->set_recurring( $this->auto_renew );
 				$member->set_expiration_date( $expiration );
