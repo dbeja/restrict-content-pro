@@ -229,6 +229,7 @@ function rcp_process_registration() {
 			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
 			'subscription'          => $subscription->name,
 			'object_id'             => $subscription->id,
+			'object_type'           => 'subscription',
 			'gateway'               => $gateway,
 			'subscription_key'      => $subscription_key,
 			'amount'                => $amount,
