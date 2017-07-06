@@ -1109,7 +1109,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 
 	$args = wp_parse_args( $args, $defaults );
 
-	// Subscription ID ise required.
+	// Subscription ID is required.
 	if ( empty( $args['subscription_id'] ) ) {
 		return false;
 	}
@@ -1118,7 +1118,6 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	$member              = new RCP_Member( $user_id );
 	$old_subscription_id = get_user_meta( $member->ID, '_rcp_old_subscription_id', true );
 	$subscription_level  = $rcp_levels_db->get_level( $args['subscription_id'] );
-	$prorated            = $member->get_prorate_credit_amount();
 
 	// Invalid subscription level - bail.
 	if ( empty( $subscription_level ) ) {
@@ -1142,7 +1141,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	if ( empty( $expiration ) ) {
 		$force_now = $args['recurring'];
 
-		if ( ! $force_now && ! empty( $prorated ) && rcp_get_subscription_id() != $subscription_level->id ) {
+		if ( ! $force_now && $member->get_subscription_id() != $subscription_level->id ) {
 			$force_now = true;
 		}
 

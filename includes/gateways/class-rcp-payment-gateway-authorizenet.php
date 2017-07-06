@@ -82,6 +82,11 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 	 */
 	public function process_signup() {
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		if ( empty( $this->api_login_id ) || empty( $this->transaction_key ) ) {
 			rcp_errors()->add( 'missing_authorize_settings', __( 'Authorize.net API Login ID or Transaction key is missing.', 'rcp' ) );
 		}
@@ -143,20 +148,35 @@ class RCP_Payment_Gateway_Authorizenet extends RCP_Payment_Gateway {
 					$cancelled = $member->cancel_payment_profile( false );
 				}
 
-				$force_now  = $this->auto_renew || ( $member->get_subscription_id() != $this->subscription_id );
-				$expiration = $member->calculate_expiration( $force_now );
-				$member->set_subscription_id( $this->subscription_id );
 				$member->set_recurring( $this->auto_renew );
-				$member->set_expiration_date( $expiration );
-				$member->set_status( 'active' );
-				$member->add_note( __( 'Subscription started in Authorize.net', 'rcp' ) );
 				$member->set_payment_profile_id( 'anet_' . $response->getSubscriptionId() );
 
-				/*
-				 * Set pending expiration date so this will be used in rcp_add_subscription_to_user() when the webhook
-				 * gets the transaction ID and completes the payment, which may take several hours.
-				 */
-				update_user_meta( $this->user_id, 'rcp_pending_expiration_date', $expiration );
+				if ( $this->is_trial() ) {
+
+					// Complete $0 payment and activate account.
+					$rcp_payments_db->update( $this->payment->id, array(
+						'payment_type' => 'Credit Card',
+						'status'       => 'complete'
+					) );
+
+				} else {
+
+					// Manually set these values because webhook has a big delay and we want to activate the account ASAP.
+					$force_now  = $this->auto_renew || ( $member->get_subscription_id() != $this->subscription_id );
+					$expiration = $member->calculate_expiration( $force_now );
+					$member->set_subscription_id( $this->subscription_id );
+					$member->set_expiration_date( $expiration );
+					$member->set_status( 'active' );
+
+					/*
+					 * Set pending expiration date so this will be used in rcp_add_subscription_to_user() when the webhook
+					 * gets the transaction ID and completes the payment, which may take several hours.
+					 */
+					update_user_meta( $this->user_id, 'rcp_pending_expiration_date', $expiration );
+
+				}
+
+				$member->add_note( __( 'Subscription started in Authorize.net', 'rcp' ) );
 
 				if ( ! is_user_logged_in() ) {
 
