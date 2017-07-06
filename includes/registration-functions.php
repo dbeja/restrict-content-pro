@@ -1215,9 +1215,7 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	$member->set_joined_date( '', $subscription_level->id );
 
 	// Recurring.
-	if ( ! empty( $args['recurring'] ) ) {
-		$member->set_recurring();
-	}
+	$member->set_recurring( $args['recurring'] );
 
 	// Payment profile ID
 	if ( ! empty( $args['payment_profile_id'] ) ) {
