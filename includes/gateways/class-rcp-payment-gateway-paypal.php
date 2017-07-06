@@ -290,6 +290,8 @@ class RCP_Payment_Gateway_PayPal extends RCP_Payment_Gateway {
 			$pending_amount = get_user_meta( $member->ID, 'rcp_pending_subscription_amount', true );
 			$pending_amount = number_format( (float) $pending_amount, 2 );
 
+			$pending_payment_id = $member->get_pending_payment_id();
+
 			// Check for invalid amounts in the IPN data
 			if ( ! empty( $pending_amount ) && ! empty( $amount ) && in_array( $posted['txn_type'], array( 'web_accept', 'subscr_payment' ) ) ) {
 
@@ -363,11 +365,9 @@ class RCP_Payment_Gateway_PayPal extends RCP_Payment_Gateway {
 
 					$member->set_payment_profile_id( $posted['subscr_id'] );
 
-					if ( $has_trial ) {
-						$trial_expires = $member->calculate_expiration( true, true );
-						$member->set_expiration_date( $trial_expires );
-						$member->set_status( 'active' );
-						$member->set_recurring( true );
+					if ( $has_trial && ! empty( $pending_payment_id ) ) {
+						// This activates the trial.
+						$rcp_payments->update( $pending_payment_id, $payment_data );
 					}
 
 					do_action( 'rcp_ipn_subscr_signup', $user_id );
@@ -385,8 +385,6 @@ class RCP_Payment_Gateway_PayPal extends RCP_Payment_Gateway {
 					update_user_meta( $user_id, 'rcp_paypal_subscriber', $posted['payer_id'] );
 
 					$member->set_payment_profile_id( $posted['subscr_id'] );
-
-					$pending_payment_id = $member->get_pending_payment_id();
 
 					if ( ! empty( $pending_payment_id ) ) {
 
