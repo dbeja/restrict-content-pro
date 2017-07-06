@@ -65,6 +65,11 @@ class RCP_Payment_Gateway_PayPal_Pro extends RCP_Payment_Gateway {
 
 		global $rcp_options;
 
+		/**
+		 * @var RCP_Payments $rcp_payments_db
+		 */
+		global $rcp_payments_db;
+
 		if ( is_user_logged_in() ) {
 			$user_data  = get_userdata( $this->user_id );
 			$first_name = $user_data->first_name;
@@ -174,9 +179,14 @@ class RCP_Payment_Gateway_PayPal_Pro extends RCP_Payment_Gateway {
 				}
 
 				if ( isset( $body['TRANSACTIONID'] ) && false !== strpos( strtolower( $body['ACK'] ), 'success' ) ) {
-					// Confirm a one-time payment
-					//$member->renew( $this->auto_renew );
-					// @todo Verify that the above needs to be commented out and see about updating payment to complete here instead of waiting for webhook.
+					// Confirm a one-time payment. Updating the payment activates the account.
+					$payment_data = array(
+						'payment_type'   => 'Credit Card One Time',
+						'transaction_id' => sanitize_text_field( $body['TRANSACTIONID'] ),
+						'status'         => 'complete'
+					);
+
+					$rcp_payments_db->update( $this->payment->id, $payment_data );
 				}
 
 				wp_redirect( esc_url_raw( rcp_get_return_url() ) ); exit;

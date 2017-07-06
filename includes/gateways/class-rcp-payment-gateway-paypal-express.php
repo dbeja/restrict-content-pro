@@ -591,7 +591,11 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 							}
 						}
 
-						$rcp_payments->insert( $payment_data );
+						if ( empty( $payment_data['transaction_id'] ) || $rcp_payments->payment_exists( $payment_data['transaction_id'] ) ) {
+							rcp_log( sprintf( 'Not inserting PayPal Express web_accept payment. Transaction ID not given or payment already exists. TXN ID: %s', $payment_data['transaction_id'] ) );
+						} else {
+							$rcp_payments->insert( $payment_data );
+						}
 
 						// Member was already activated.
 
