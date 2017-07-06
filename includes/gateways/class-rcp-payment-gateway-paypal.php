@@ -315,7 +315,8 @@ class RCP_Payment_Gateway_PayPal extends RCP_Payment_Gateway {
 				'subscription_key' => $subscription_key,
 				'amount'           => $amount,
 				'user_id'          => $user_id,
-				'transaction_id'   => ! empty( $posted['txn_id'] ) ? $posted['txn_id'] : false
+				'transaction_id'   => ! empty( $posted['txn_id'] ) ? $posted['txn_id'] : false,
+				'status'           => 'complete'
 			);
 
 			do_action( 'rcp_valid_ipn', $payment_data, $user_id, $posted );
@@ -385,10 +386,23 @@ class RCP_Payment_Gateway_PayPal extends RCP_Payment_Gateway {
 
 					$member->set_payment_profile_id( $posted['subscr_id'] );
 
-					$member->renew( true );
+					$pending_payment_id = $member->get_pending_payment_id();
 
-					// record this payment in the database
-					$payment_id = $rcp_payments->insert( $payment_data );
+					if ( ! empty( $pending_payment_id ) ) {
+
+						// This activates the membership.
+						$rcp_payments->update( $pending_payment_id, $payment_data );
+
+						$payment_id = $pending_payment_id;
+
+					} else {
+
+						$member->renew( true );
+
+						// record this payment in the database
+						$payment_id = $rcp_payments->insert( $payment_data );
+
+					}
 
 					do_action( 'rcp_ipn_subscr_payment', $user_id );
 					do_action( 'rcp_webhook_recurring_payment_processed', $member, $payment_id, $this );
