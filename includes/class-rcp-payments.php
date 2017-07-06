@@ -162,7 +162,7 @@ class RCP_Payments {
 			 * @param int   $payment_id ID of the payment that was just inserted.
 			 * @param array $args       Array of all payment information.
 			 *
-			 * @since 2.0
+			 * @since 2.9
 			 */
 			do_action( 'rcp_create_payment', $payment_id, $args );
 
