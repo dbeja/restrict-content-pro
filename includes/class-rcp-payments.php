@@ -144,6 +144,9 @@ class RCP_Payments {
 				 * ensure backwards compatibility from before payments were inserted
 				 * as "pending" before payment is taken.
 				 *
+				 * @deprecated 2.9 - Use rcp_create_payment to run actions whenever a payment is
+				 *             inserted, regardless of status.
+				 *
 				 * @see RCP_Payment::update() - Action is also run here when status is updated to complete.
 				 *
 				 * @param int   $payment_id ID of the payment that was just inserted.
@@ -152,6 +155,16 @@ class RCP_Payments {
 				 */
 				do_action( 'rcp_insert_payment', $payment_id, $args, $args['amount'] );
 			}
+
+			/**
+			 * Runs when a new payment is successfully inserted.
+			 *
+			 * @param int   $payment_id ID of the payment that was just inserted.
+			 * @param array $args       Array of all payment information.
+			 *
+			 * @since 2.0
+			 */
+			do_action( 'rcp_create_payment', $payment_id, $args );
 
 			rcp_log( sprintf( 'New payment inserted. ID: %d; User ID: %d; Amount: %.2f; Subscription: %s; Status: %s', $payment_id, $args['user_id'], $args['amount'], $args['subscription'], $args['status'] ) );
 
@@ -241,13 +254,16 @@ class RCP_Payments {
 				 * ensure backwards compatibility from before payments were inserted
 				 * as "pending" before payment is taken.
 				 *
+				 * @deprecated 2.9 - Use rcp_create_payment to run actions whenever a payment is
+				 *             inserted, regardless of status.
+				 *
 				 * @see RCP_Payments::insert() - Action is also run here.
 				 *
 				 * @param int   $payment_id ID of the payment that was just updated.
 				 * @param array $args       Array of payment information that was just updated.
 				 * @param float $amount     Amount the payment was for.
 				 */
-				do_action( 'rcp_insert_payment', $payment_id, $payment_data, $amount);
+				do_action( 'rcp_insert_payment', $payment_id, (array) $payment, $amount );
 			}
 
 		}
