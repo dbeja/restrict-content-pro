@@ -456,7 +456,8 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 			'subscription_key' => $member->get_subscription_key(),
 			'amount'           => $amount,
 			'user_id'          => $user_id,
-			'transaction_id'   => $posted['txn_id']
+			'transaction_id'   => $posted['txn_id'],
+			'status'           => 'complete'
 		);
 
 		do_action( 'rcp_valid_ipn', $payment_data, $user_id, $posted );
@@ -589,16 +590,6 @@ class RCP_Payment_Gateway_PayPal_Express extends RCP_Payment_Gateway {
 
 							}
 						}
-
-						$payment_data = array(
-							'date'             => date( 'Y-m-d H:i:s', strtotime( $posted['payment_date'] ) ),
-							'subscription'     => $member->get_subscription_name(),
-							'payment_type'     => $posted['txn_type'],
-							'subscription_key' => $member->get_subscription_key(),
-							'amount'           => number_format( (float) $posted['mc_gross'], 2 ),
-							'user_id'          => $user_id,
-							'transaction_id'   => sanitize_text_field( $posted['txn_id'] ),
-						);
 
 						$rcp_payments->insert( $payment_data );
 
