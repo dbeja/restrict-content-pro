@@ -209,6 +209,7 @@ class RCP_Payment_Gateway_Braintree extends RCP_Payment_Gateway {
 
 						$rcp_payments_db->update( $this->payment->id, array(
 							'date'           => date( 'Y-m-d g:i:s', time() ),
+							'payment_type'   => __( 'Braintree Credit Card Initial Payment', 'rcp' ),
 							'transaction_id' => $single_payment->transaction->id,
 							'status'         => 'complete'
 						) );
