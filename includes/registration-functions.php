@@ -204,12 +204,28 @@ function rcp_process_registration() {
 
 	do_action( 'rcp_form_processing', $_POST, $user_data['id'], $price );
 
-	$member_data = array(
-		'subscription_id'  => $subscription_id,
-		'discount_code'    => $discount,
-		'subscription_key' => $subscription_key,
-		'status'           => 'active'
+	// Create a pending payment
+	$amount = ( ! empty( $trial_duration ) && ! rcp_has_used_trial() ) ? 0.00 : rcp_get_registration()->get_total();
+	$payment_data = array(
+		'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
+		'subscription'          => $subscription->name,
+		'object_id'             => $subscription->id,
+		'object_type'           => 'subscription',
+		'gateway'               => $gateway,
+		'subscription_key'      => $subscription_key,
+		'amount'                => $amount,
+		'user_id'               => $user_data['id'],
+		'status'                => 'pending',
+		'subtotal'              => $subscription->price,
+		'credits'               => $member->get_prorate_credit_amount(),
+		'fees'                  => rcp_get_registration()->get_total_fees() + $member->get_prorate_credit_amount(),
+		'discount_amount'       => rcp_get_registration()->get_total_discounts(),
+		'discount_code'         => $discount,
 	);
+
+	$rcp_payments = new RCP_Payments();
+	$payment_id   = $rcp_payments->insert( $payment_data );
+	update_user_meta( $user_data['id'], 'rcp_pending_payment_id', $payment_id );
 
 	// process a paid subscription
 	if( $price > '0' || $trial_duration ) {
@@ -218,38 +234,17 @@ function rcp_process_registration() {
 
 			// Full discount with auto renew should never expire.
 			if ( '2' != rcp_get_auto_renew_behavior() ) {
-				$member_data['expiration'] = 'none';
+				update_user_meta( $user_data['id'], 'rcp_pending_expiration_date', 'none' );
 			}
 
-			rcp_add_subscription_to_user( $user_data['id'], $member_data );
+			// Complete payment. This also activates the membership.
+			$rcp_payments->update( $payment_id, array( 'status' => 'complete' ) );
+
 			rcp_log( sprintf( 'Completed registration to level #%d with full discount for user #%d.', $subscription_id, $user_data['id'] ) );
 			rcp_login_user_in( $user_data['id'], $user_data['login'] );
 			wp_redirect( rcp_get_return_url( $user_data['id'] ) ); exit;
 
 		}
-
-		// Create a pending payment
-		$amount = ( ! empty( $trial_duration ) && ! rcp_has_used_trial() ) ? 0.00 : rcp_get_registration()->get_total();
-		$payment_data = array(
-			'date'                  => date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ),
-			'subscription'          => $subscription->name,
-			'object_id'             => $subscription->id,
-			'object_type'           => 'subscription',
-			'gateway'               => $gateway,
-			'subscription_key'      => $subscription_key,
-			'amount'                => $amount,
-			'user_id'               => $user_data['id'],
-			'status'                => 'pending',
-			'subtotal'              => $subscription->price,
-			'credits'               => $member->get_prorate_credit_amount(),
-			'fees'                  => rcp_get_registration()->get_total_fees() + $member->get_prorate_credit_amount(),
-			'discount_amount'       => rcp_get_registration()->get_total_discounts(),
-			'discount_code'         => $discount,
-		);
-
-		$rcp_payments = new RCP_Payments();
-		$payment_id   = $rcp_payments->insert( $payment_data );
-		update_user_meta( $user_data['id'], 'rcp_pending_payment_id', $payment_id );
 
 		// log the new user in
 		rcp_login_user_in( $user_data['id'], $user_data['login'] );
@@ -294,12 +289,8 @@ function rcp_process_registration() {
 	// process a free or trial subscription
 	} else {
 
-		// If the subscription is forever, member status is "free".
-		if ( $subscription->duration == 0 ) {
-			$member_data['status'] = 'free';
-		}
-
-		rcp_add_subscription_to_user( $user_data['id'], $member_data );
+		// Complete payment. This also activates the membership.
+		$rcp_payments->update( $payment_id, array( 'status' => 'complete' ) );
 
 		if( $user_data['need_new'] ) {
 
@@ -1051,7 +1042,7 @@ function rcp_complete_registration( $payment_id ) {
 
 	// This updates the expiration date, status, discount code usage, role, etc.
 	$args = array(
-		'status'           => 'active',
+		'status'           => ( 0 == $subscription->duration ) ? 'free' : 'active',
 		'subscription_id'  => $subscription_id,
 		'discount_code'    => $payment->discount_code,
 		'recurring'        => $member->is_recurring(),
