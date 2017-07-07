@@ -189,6 +189,11 @@ function rcp_process_registration() {
 
 	}
 
+	// Remove trialing status, if it exists
+	if ( ! $trial_duration || $trial_duration && $member_has_trialed ) {
+		delete_user_meta( $user_data['id'], 'rcp_is_trialing' );
+	}
+
 	// Delete pending payment ID. A new one may be created for paid subscriptions.
 	delete_user_meta( $user_data['id'], 'rcp_pending_payment_id' );
 
@@ -212,7 +217,7 @@ function rcp_process_registration() {
 		if( ! empty( $discount ) && $full_discount ) {
 
 			// Full discount with auto renew should never expire.
-			if ( $auto_renew ) {
+			if ( '2' != rcp_get_auto_renew_behavior() ) {
 				$member_data['expiration'] = 'none';
 			}
 
@@ -245,11 +250,6 @@ function rcp_process_registration() {
 		$rcp_payments = new RCP_Payments();
 		$payment_id   = $rcp_payments->insert( $payment_data );
 		update_user_meta( $user_data['id'], 'rcp_pending_payment_id', $payment_id );
-
-		// Remove trialing status, if it exists
-		if ( ! $trial_duration || $trial_duration && $member_has_trialed ) {
-			delete_user_meta( $user_data['id'], 'rcp_is_trialing' );
-		}
 
 		// log the new user in
 		rcp_login_user_in( $user_data['id'], $user_data['login'] );
@@ -1186,6 +1186,15 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	$member->add_role( apply_filters( 'rcp_default_user_level', $role, $subscription_level->id ) );
 
 	/*
+	 * Flag the user as trialling. This needs to be done before setting the status in order
+	 * to trigger the correct activation email.
+	 */
+	if ( ( 0 == $subscription_level->price && $subscription_level->duration > 0 ) || ( ! empty( $args['trial_duration'] )&& ! $member->has_trialed() ) ) {
+		update_user_meta( $member->ID, 'rcp_has_trialed', 'yes' );
+		update_user_meta( $member->ID, 'rcp_is_trialing', 'yes' );
+	}
+
+	/*
 	 * Set the status
 	 * Determine it automatically if not provided.
 	 */
@@ -1204,12 +1213,6 @@ function rcp_add_subscription_to_user( $user_id, $args = array() ) {
 	/*
 	 * All other data
 	 */
-
-	// This is so users can only sign up for one trial.
-	if ( ( 0 == $subscription_level->price && $subscription_level->duration > 0 ) || ( ! empty( $args['trial_duration'] )&& ! $member->has_trialed() ) ) {
-		update_user_meta( $member->ID, 'rcp_has_trialed', 'yes' );
-		update_user_meta( $member->ID, 'rcp_is_trialing', 'yes' );
-	}
 
 	// Set join date for this subscription.
 	$member->set_joined_date( '', $subscription_level->id );
