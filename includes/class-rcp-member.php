@@ -288,7 +288,11 @@ class RCP_Member extends WP_User {
 			$subscription_id = $this->get_subscription_id();
 		}
 
-		$ret = update_user_meta( $this->ID, 'rcp_joined_date_' . $this->get_subscription_id(), $date );
+		// check if joined date already exists.
+		$has_joined_date = ! empty( get_user_meta( $this->ID, 'rcp_joined_date_' . $this->get_subscription_id(), true ) );
+
+		// only update rcp_joined_date if the user meta doesn't exist
+		$ret = $has_joined_date || update_user_meta( $this->ID, 'rcp_joined_date_' . $this->get_subscription_id(), $date );
 
 		do_action( 'rcp_set_joined_date', $this->ID, $date, $this );
 
